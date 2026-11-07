@@ -1,0 +1,31 @@
+{
+  "name": "lifeos",
+  "version": "0.1.0",
+  "private": true,
+  "description": "LifeOS — centralized personal management platform",
+  "scripts": {
+    "dev": "concurrently -n frontend,backend -c blue,green \"pnpm dev:frontend\" \"pnpm dev:backend\"",
+    "dev:frontend": "pnpm --filter @lifeos/frontend dev",
+    "dev:backend": "pnpm --filter @lifeos/backend dev",
+    "dev:mcp": "pnpm --filter @lifeos/mcp-server dev",
+    "build": "pnpm -r build",
+    "lint": "pnpm -r lint",
+    "typecheck": "pnpm -r typecheck",
+    "format": "prettier --write \"**/*.{ts,tsx,json,css,md}\"",
+    "test": "pnpm -r test",
+    "db:migrate": "pnpm --filter @lifeos/backend db:migrate",
+    "db:push": "pnpm --filter @lifeos/backend db:push",
+    "db:seed": "pnpm --filter @lifeos/backend db:seed",
+    "db:studio": "pnpm --filter @lifeos/backend db:studio",
+    "db:reset": "pnpm --filter @lifeos/backend db:reset"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.3"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "packageManager": "pnpm@12.18.0"
+}
