@@ -7,6 +7,7 @@ import {
   Wallet,
   CreditCard,
   FolderKanban,
+  Target,
   BookOpen,
   FileBox,
   Zap,
@@ -50,6 +51,10 @@ const navigation: NavGroup[] = [
   {
     label: 'Projects',
     items: [{ label: 'Projects', path: '/projects', icon: FolderKanban }],
+  },
+  {
+    label: 'Growth',
+    items: [{ label: 'Goals & Habits', path: '/goals', icon: Target }],
   },
   {
     label: 'Knowledge',

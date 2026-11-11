@@ -1,12 +1,24 @@
 import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { X, Plus, Trash2, Circle, CheckCircle2, Calendar as CalendarIcon, Clock, Edit2 } from 'lucide-react';
+import { X, Plus, Trash2, Circle, CheckCircle2, Calendar as CalendarIcon, Clock, Edit2, Repeat, History } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { PriorityBadge } from './priority-badge';
 import { StatusBadge } from './status-badge';
-import { useUpdateTask, useDeleteTask, useAddSubtask, useUpdateSubtask, useDeleteSubtask } from '../hooks/use-tasks';
-import type { Task, Priority, TaskStatus } from '@lifeos/shared';
+import { useUpdateTask, useDeleteTask, useAddSubtask, useUpdateSubtask, useDeleteSubtask, useTaskActivities } from '../hooks/use-tasks';
+import type { Task, Priority, TaskStatus, TaskActivityAction } from '@lifeos/shared';
 import { format } from 'date-fns';
+
+const ACTIVITY_LABELS: Record<TaskActivityAction, string> = {
+  completed: 'Completed for',
+  reopened: 'Reopened',
+  created: 'Created',
+  updated: 'Updated',
+  rescheduled: 'Rescheduled to',
+};
+
+function formatActivityAction(action: TaskActivityAction): string {
+  return ACTIVITY_LABELS[action] ?? action;
+}
 
 interface TaskDetailPanelProps {
   task: Task | null;
@@ -20,6 +32,8 @@ export function TaskDetailPanel({ task, onClose }: TaskDetailPanelProps) {
   const addSubtask = useAddSubtask();
   const updateSubtask = useUpdateSubtask();
   const deleteSubtask = useDeleteSubtask();
+  const { data: activitiesData } = useTaskActivities(task?.isRecurring ? task?.id : undefined);
+  const activities = activitiesData?.data ?? [];
 
   const [isEditing, setIsEditing] = useState(false);
   const [editTitle, setEditTitle] = useState('');
@@ -297,6 +311,34 @@ export function TaskDetailPanel({ task, onClose }: TaskDetailPanelProps) {
                 </div>
               </div>
             </div>
+
+            {task.isRecurring && activities.length > 0 && (
+              <div>
+                <h3 className="text-xs font-medium text-muted uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                  <History className="h-3.5 w-3.5" />
+                  Activity History
+                </h3>
+                <div className="space-y-1.5 max-h-48 overflow-y-auto">
+                  {activities.map((activity) => (
+                    <div key={activity.id} className="flex items-start gap-2 text-xs">
+                      <span className={cn(
+                        'shrink-0 mt-0.5 h-1.5 w-1.5 rounded-full',
+                        activity.action === 'completed' ? 'bg-success' : activity.action === 'rescheduled' ? 'bg-primary' : 'bg-muted',
+                      )} />
+                      <span className="text-muted-foreground">
+                        {formatActivityAction(activity.action as TaskActivityAction)}
+                        {activity.dueDate && (
+                          <span className="text-foreground"> {format(new Date(activity.dueDate), 'MMM d, yyyy')}</span>
+                        )}
+                      </span>
+                      <span className="ml-auto shrink-0 text-muted">
+                        {format(new Date(activity.createdAt), 'MMM d, h:mm a')}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
             <div className="pt-4 border-t border-border">
               <button

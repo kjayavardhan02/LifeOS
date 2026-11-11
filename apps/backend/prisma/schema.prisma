@@ -111,18 +111,22 @@ model Task {
   estimatedMinutes  Int?
   isMyDay           Boolean           @default(false)
   myDayDate         DateTime?
-  isRecurring       Boolean           @default(false)
-  recurrencePattern RecurrencePattern?
-  recurrenceEndDate DateTime?
-  notes             String?
-  projectId         String?
-  completedAt       DateTime?
-  createdAt         DateTime          @default(now())
-  updatedAt         DateTime          @updatedAt
-  deletedAt         DateTime?
+  isRecurring         Boolean           @default(false)
+  recurrencePattern   RecurrencePattern?
+  recurrenceInterval  Int               @default(1)
+  recurrenceDays      String[]          @default([])
+  recurrenceEndDate   DateTime?
+  notes               String?
+  projectId           String?
+  completedAt         DateTime?
+  createdAt           DateTime          @default(now())
+  updatedAt           DateTime          @updatedAt
+  deletedAt           DateTime?
 
-  subtasks Subtask[]
-  project  Project?  @relation(fields: [projectId], references: [id])
+  subtasks   Subtask[]
+  project    Project?   @relation(fields: [projectId], references: [id])
+  goalLinks  GoalTask[]
+  activities TaskActivity[]
 
   @@index([status])
   @@index([projectId])
@@ -147,6 +151,21 @@ model Subtask {
 
   @@index([taskId])
   @@map("subtasks")
+}
+
+model TaskActivity {
+  id        String   @id @default(uuid())
+  taskId    String
+  action    String
+  note      String?
+  dueDate   DateTime?
+  createdAt DateTime @default(now())
+
+  task Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
+
+  @@index([taskId])
+  @@index([createdAt])
+  @@map("task_activities")
 }
 
 model CalendarEvent {
@@ -335,6 +354,7 @@ model Project {
 
   milestones Milestone[]
   tasks      Task[]
+  goals      Goal[]
 
   @@index([status])
   @@index([priority])
@@ -446,6 +466,143 @@ model DocumentFile {
 
   @@index([documentId])
   @@map("document_files")
+}
+
+enum GoalStatus {
+  not_started
+  in_progress
+  completed
+  abandoned
+}
+
+enum GoalType {
+  short_term
+  long_term
+}
+
+enum HabitFrequency {
+  daily
+  specific_days
+  weekly
+  monthly
+}
+
+model Goal {
+  id          String     @id @default(uuid())
+  title       String
+  description String?    @db.Text
+  type        GoalType   @default(short_term)
+  status      GoalStatus @default(not_started)
+  priority    Priority   @default(medium)
+  category    String     @default("Personal")
+  tags        String[]   @default([])
+  targetDate  DateTime?
+  progress    Int        @default(0)
+  progressMode String   @default("auto")
+  notes       String?    @db.Text
+  projectId   String?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  deletedAt   DateTime?
+
+  milestones GoalMilestone[]
+  linkedTasks GoalTask[]
+  linkedHabits HabitGoal[]
+  project    Project? @relation(fields: [projectId], references: [id])
+
+  @@index([status])
+  @@index([type])
+  @@index([priority])
+  @@index([category])
+  @@index([targetDate])
+  @@index([projectId])
+  @@index([deletedAt])
+  @@map("goals")
+}
+
+model GoalMilestone {
+  id          String          @id @default(uuid())
+  title       String
+  description String?
+  targetDate  DateTime?
+  status      MilestoneStatus @default(pending)
+  sortOrder   Int             @default(0)
+  goalId      String
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+
+  goal Goal @relation(fields: [goalId], references: [id], onDelete: Cascade)
+
+  @@index([goalId])
+  @@index([status])
+  @@map("goal_milestones")
+}
+
+model GoalTask {
+  goalId String
+  taskId String
+
+  goal Goal @relation(fields: [goalId], references: [id], onDelete: Cascade)
+  task Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
+
+  @@id([goalId, taskId])
+  @@map("goal_tasks")
+}
+
+model Habit {
+  id            String         @id @default(uuid())
+  name          String
+  description   String?
+  frequency     HabitFrequency @default(daily)
+  targetDays    String[]       @default([])
+  targetCount   Int            @default(1)
+  unit          String?
+  category      String         @default("Personal")
+  color         String         @default("#4E85DE")
+  isArchived    Boolean        @default(false)
+  streakCurrent Int            @default(0)
+  streakLongest Int            @default(0)
+  streakFreezes Int            @default(2)
+  freezesUsed   Int            @default(0)
+  freezeResetAt DateTime?
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  deletedAt     DateTime?
+
+  logs        HabitLog[]
+  linkedGoals HabitGoal[]
+
+  @@index([isArchived])
+  @@index([category])
+  @@index([deletedAt])
+  @@map("habits")
+}
+
+model HabitLog {
+  id        String   @id @default(uuid())
+  habitId   String
+  date      DateTime @db.Date
+  value     Int      @default(1)
+  note      String?
+  createdAt DateTime @default(now())
+
+  habit Habit @relation(fields: [habitId], references: [id], onDelete: Cascade)
+
+  @@unique([habitId, date])
+  @@index([habitId])
+  @@index([date])
+  @@map("habit_logs")
+}
+
+model HabitGoal {
+  habitId String
+  goalId  String
+
+  habit Habit @relation(fields: [habitId], references: [id], onDelete: Cascade)
+  goal  Goal  @relation(fields: [goalId], references: [id], onDelete: Cascade)
+
+  @@id([habitId, goalId])
+  @@map("habit_goals")
 }
 
 model QuickCapture {

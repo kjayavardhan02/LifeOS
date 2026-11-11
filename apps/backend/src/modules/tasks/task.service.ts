@@ -1,6 +1,7 @@
 import type { Prisma } from '@prisma/client';
 import { prisma } from '../../lib/prisma.js';
 import { AppError } from '../../middleware/error-handler.js';
+import { goalService } from '../goals/goal.service.js';
 import type { z } from 'zod';
 import type { createTaskSchema, updateTaskSchema, taskQuerySchema, createSubtaskSchema, updateSubtaskSchema } from './task.validator.js';
 
@@ -10,7 +11,10 @@ type TaskQuery = z.infer<typeof taskQuerySchema>;
 type CreateSubtaskInput = z.infer<typeof createSubtaskSchema>;
 type UpdateSubtaskInput = z.infer<typeof updateSubtaskSchema>;
 
-const taskInclude = { subtasks: { orderBy: { sortOrder: 'asc' as const } } };
+const taskInclude = {
+  subtasks: { orderBy: { sortOrder: 'asc' as const } },
+  activities: { orderBy: { createdAt: 'desc' as const }, take: 50 },
+};
 
 export const taskService = {
   async list(query: TaskQuery) {
@@ -68,7 +72,7 @@ export const taskService = {
   },
 
   async update(id: string, input: UpdateTaskInput) {
-    await this.getById(id);
+    const existing = await this.getById(id);
 
     const data: Prisma.TaskUpdateInput = { ...input };
 
@@ -89,10 +93,76 @@ export const taskService = {
       data.myDayDate = null;
     }
 
-    return prisma.task.update({
+    const updated = await prisma.task.update({
       where: { id },
       data,
       include: taskInclude,
+    });
+
+    if (input.status) {
+      const goalLinks = await prisma.goalTask.findMany({ where: { taskId: id }, select: { goalId: true } });
+      await Promise.all(goalLinks.map((gl) => goalService.refreshAutoProgress(gl.goalId)));
+    }
+
+    if (input.status === 'done' && updated.isRecurring && updated.recurrencePattern) {
+      await this.handleRecurringCompletion(updated);
+    }
+
+    return await this.getById(id);
+  },
+
+  async handleRecurringCompletion(task: {
+    id: string;
+    dueDate: Date | null;
+    recurrencePattern: string | null;
+    recurrenceInterval: number;
+    recurrenceDays: string[];
+    recurrenceEndDate: Date | null;
+  }) {
+    const baseDate = task.dueDate ?? new Date();
+    const nextDue = computeNextDueDate(
+      baseDate,
+      task.recurrencePattern!,
+      task.recurrenceInterval,
+      task.recurrenceDays,
+    );
+
+    await prisma.taskActivity.create({
+      data: {
+        taskId: task.id,
+        action: 'completed',
+        dueDate: task.dueDate,
+      },
+    });
+
+    if (!nextDue || (task.recurrenceEndDate && nextDue > task.recurrenceEndDate)) {
+      return;
+    }
+
+    await prisma.task.update({
+      where: { id: task.id },
+      data: {
+        status: 'todo',
+        completedAt: null,
+        dueDate: nextDue,
+      },
+    });
+
+    await prisma.taskActivity.create({
+      data: {
+        taskId: task.id,
+        action: 'rescheduled',
+        dueDate: nextDue,
+      },
+    });
+  },
+
+  async getActivities(taskId: string) {
+    await this.getById(taskId);
+    return prisma.taskActivity.findMany({
+      where: { taskId },
+      orderBy: { createdAt: 'desc' },
+      take: 100,
     });
   },
 
@@ -211,4 +281,50 @@ function addDays(date: Date, days: number): Date {
   const d = new Date(date);
   d.setDate(d.getDate() + days);
   return d;
+}
+
+const DAY_NAMES = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
+
+function computeNextDueDate(
+  baseDate: Date,
+  pattern: string,
+  interval: number,
+  recurrenceDays: string[],
+): Date | null {
+  const d = new Date(baseDate);
+
+  switch (pattern) {
+    case 'daily':
+      d.setDate(d.getDate() + interval);
+      return d;
+
+    case 'weekly':
+      if (recurrenceDays.length > 0) {
+        const dayIndices = recurrenceDays.map((name) => DAY_NAMES.indexOf(name)).filter((i) => i >= 0).sort((a, b) => a - b);
+        if (dayIndices.length === 0) { d.setDate(d.getDate() + 7 * interval); return d; }
+
+        const currentDay = d.getDay();
+        const nextDay = dayIndices.find((di) => di > currentDay);
+        if (nextDay !== undefined) {
+          d.setDate(d.getDate() + (nextDay - currentDay));
+        } else {
+          const daysUntilNextWeek = 7 * interval - currentDay + dayIndices[0]!;
+          d.setDate(d.getDate() + daysUntilNextWeek);
+        }
+        return d;
+      }
+      d.setDate(d.getDate() + 7 * interval);
+      return d;
+
+    case 'monthly':
+      d.setMonth(d.getMonth() + interval);
+      return d;
+
+    case 'yearly':
+      d.setFullYear(d.getFullYear() + interval);
+      return d;
+
+    default:
+      return null;
+  }
 }

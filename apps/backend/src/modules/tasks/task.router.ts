@@ -57,6 +57,16 @@ taskRouter.delete('/:id', async (req, res, next) => {
   }
 });
 
+// Activity routes
+taskRouter.get('/:id/activities', async (req, res, next) => {
+  try {
+    const activities = await taskService.getActivities(req.params.id as string);
+    res.json({ data: activities });
+  } catch (err) {
+    next(err);
+  }
+});
+
 // Subtask routes
 taskRouter.post('/:id/subtasks', validate(createSubtaskSchema), async (req, res, next) => {
   try {

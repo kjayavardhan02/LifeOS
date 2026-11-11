@@ -17,6 +17,7 @@ import { knowledgeRouter } from './modules/knowledge/index.js';
 import { documentRouter } from './modules/documents/index.js';
 import { quickCaptureRouter } from './modules/quick-capture/index.js';
 import { searchRouter } from './modules/search/index.js';
+import { goalRouter, habitRouter } from './modules/goals/index.js';
 
 const app: Express = express();
 
@@ -46,6 +47,8 @@ app.use('/api/knowledge', knowledgeRouter);
 app.use('/api/documents', documentRouter);
 app.use('/api/quick-capture', quickCaptureRouter);
 app.use('/api/search', searchRouter);
+app.use('/api/goals', goalRouter);
+app.use('/api/habits', habitRouter);
 
 app.use(errorHandler);
 

@@ -3,6 +3,7 @@ import toast from 'react-hot-toast';
 import { api } from '@/lib/api';
 import type {
   Task,
+  TaskActivity,
   Subtask,
   CreateTaskInput,
   UpdateTaskInput,
@@ -127,5 +128,13 @@ export function useDeleteSubtask() {
       toast.success('Subtask deleted');
     },
     onError: (err: Error) => toast.error(err.message || 'Failed to delete subtask'),
+  });
+}
+
+export function useTaskActivities(taskId: string | undefined) {
+  return useQuery({
+    queryKey: [...TASKS_KEY, taskId, 'activities'],
+    queryFn: () => api.get<ApiResponse<TaskActivity[]>>(`/tasks/${taskId}/activities`),
+    enabled: !!taskId,
   });
 }

@@ -13,6 +13,7 @@ import { ProjectsPage, ProjectDetailPage } from '@/modules/projects';
 import { KnowledgePage } from '@/modules/knowledge';
 import { DocumentsPage } from '@/modules/documents';
 import { QuickCapturePage } from '@/modules/quick-capture';
+import { GoalsHabitsPage, GoalDetailPage } from '@/modules/goals';
 
 export const router = createBrowserRouter([
   {
@@ -41,6 +42,8 @@ export const router = createBrowserRouter([
           { path: '/subscriptions', element: <SubscriptionsPage /> },
           { path: '/projects', element: <ProjectsPage /> },
           { path: '/projects/:id', element: <ProjectDetailPage /> },
+          { path: '/goals', element: <GoalsHabitsPage /> },
+          { path: '/goals/:id', element: <GoalDetailPage /> },
           { path: '/knowledge', element: <KnowledgePage /> },
           { path: '/documents', element: <DocumentsPage /> },
           { path: '/capture', element: <QuickCapturePage /> },

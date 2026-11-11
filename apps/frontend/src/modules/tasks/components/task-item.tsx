@@ -5,6 +5,20 @@ import { StatusBadge } from './status-badge';
 import type { Task } from '@lifeos/shared';
 import { format, isPast, isToday } from 'date-fns';
 
+const DAY_LABELS: Record<string, string> = { mon: 'Mon', tue: 'Tue', wed: 'Wed', thu: 'Thu', fri: 'Fri', sat: 'Sat', sun: 'Sun' };
+
+function formatRecurrence(task: Task): string {
+  const interval = task.recurrenceInterval ?? 1;
+  const pattern = task.recurrencePattern ?? 'daily';
+  const units: Record<string, [string, string]> = { daily: ['day', 'days'], weekly: ['week', 'weeks'], monthly: ['month', 'months'], yearly: ['year', 'years'] };
+  const [singular, plural] = units[pattern] ?? [pattern, pattern];
+  let label = interval === 1 ? `${pattern.charAt(0).toUpperCase()}${pattern.slice(1)}` : `Every ${interval} ${plural}`;
+  if (pattern === 'weekly' && task.recurrenceDays?.length > 0) {
+    label += ` (${task.recurrenceDays.map((d) => DAY_LABELS[d] ?? d).join(', ')})`;
+  }
+  return label;
+}
+
 interface TaskItemProps {
   task: Task;
   onToggleStatus: (task: Task) => void;
@@ -75,7 +89,7 @@ export function TaskItem({ task, onToggleStatus, onToggleMyDay, onClick }: TaskI
           {task.isRecurring && (
             <span className="flex items-center gap-1 text-xs text-primary">
               <Repeat className="h-3 w-3" />
-              {task.recurrencePattern}
+              {formatRecurrence(task)}
             </span>
           )}
 

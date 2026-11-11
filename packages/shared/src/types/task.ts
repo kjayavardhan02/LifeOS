@@ -26,6 +26,8 @@ export interface Task {
   myDayDate: string | null;
   isRecurring: boolean;
   recurrencePattern: RecurrencePattern | null;
+  recurrenceInterval: number;
+  recurrenceDays: string[];
   recurrenceEndDate: string | null;
   notes: string | null;
   projectId: string | null;
@@ -47,6 +49,8 @@ export interface CreateTaskInput {
   isMyDay?: boolean;
   isRecurring?: boolean;
   recurrencePattern?: RecurrencePattern;
+  recurrenceInterval?: number;
+  recurrenceDays?: string[];
   recurrenceEndDate?: string;
   notes?: string;
   projectId?: string;
@@ -65,6 +69,8 @@ export interface UpdateTaskInput {
   isMyDay?: boolean;
   isRecurring?: boolean;
   recurrencePattern?: RecurrencePattern | null;
+  recurrenceInterval?: number | null;
+  recurrenceDays?: string[];
   recurrenceEndDate?: string | null;
   notes?: string | null;
   projectId?: string | null;
@@ -81,4 +87,15 @@ export interface TaskFilters {
   dueDateFrom?: string;
   dueDateTo?: string;
   projectId?: string;
+}
+
+export type TaskActivityAction = 'completed' | 'reopened' | 'created' | 'updated' | 'rescheduled';
+
+export interface TaskActivity {
+  id: string;
+  taskId: string;
+  action: TaskActivityAction;
+  note: string | null;
+  dueDate: string | null;
+  createdAt: string;
 }

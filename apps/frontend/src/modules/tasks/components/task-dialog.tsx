@@ -12,6 +12,16 @@ const RECURRENCE_OPTIONS: { value: RecurrencePattern; label: string }[] = [
   { value: 'yearly', label: 'Yearly' },
 ];
 
+const WEEKDAYS: { value: string; label: string }[] = [
+  { value: 'mon', label: 'M' },
+  { value: 'tue', label: 'T' },
+  { value: 'wed', label: 'W' },
+  { value: 'thu', label: 'T' },
+  { value: 'fri', label: 'F' },
+  { value: 'sat', label: 'S' },
+  { value: 'sun', label: 'S' },
+];
+
 interface TaskDialogProps {
   open: boolean;
   onClose: () => void;
@@ -34,6 +44,8 @@ export function TaskDialog({ open, onClose, onSubmit, task }: TaskDialogProps) {
   const [notes, setNotes] = useState('');
   const [isRecurring, setIsRecurring] = useState(false);
   const [recurrencePattern, setRecurrencePattern] = useState<RecurrencePattern>('daily');
+  const [recurrenceInterval, setRecurrenceInterval] = useState(1);
+  const [recurrenceDays, setRecurrenceDays] = useState<string[]>([]);
   const [recurrenceEndDate, setRecurrenceEndDate] = useState('');
   const [subtasks, setSubtasks] = useState<{ title: string }[]>([]);
   const [newSubtask, setNewSubtask] = useState('');
@@ -51,6 +63,8 @@ export function TaskDialog({ open, onClose, onSubmit, task }: TaskDialogProps) {
       setNotes(task.notes ?? '');
       setIsRecurring(task.isRecurring);
       setRecurrencePattern(task.recurrencePattern ?? 'daily');
+      setRecurrenceInterval(task.recurrenceInterval ?? 1);
+      setRecurrenceDays(task.recurrenceDays ?? []);
       setRecurrenceEndDate(task.recurrenceEndDate ? task.recurrenceEndDate.slice(0, 16) : '');
       setSubtasks([]);
     } else {
@@ -65,6 +79,8 @@ export function TaskDialog({ open, onClose, onSubmit, task }: TaskDialogProps) {
       setNotes('');
       setIsRecurring(false);
       setRecurrencePattern('daily');
+      setRecurrenceInterval(1);
+      setRecurrenceDays([]);
       setRecurrenceEndDate('');
       setSubtasks([]);
     }
@@ -95,6 +111,8 @@ export function TaskDialog({ open, onClose, onSubmit, task }: TaskDialogProps) {
         notes: notes || null,
         isRecurring,
         recurrencePattern: isRecurring ? recurrencePattern : null,
+        recurrenceInterval: isRecurring ? recurrenceInterval : null,
+        recurrenceDays: isRecurring && recurrencePattern === 'weekly' ? recurrenceDays : [],
         recurrenceEndDate: isRecurring && recurrenceEndDate ? new Date(recurrenceEndDate).toISOString() : null,
       });
     } else {
@@ -110,6 +128,8 @@ export function TaskDialog({ open, onClose, onSubmit, task }: TaskDialogProps) {
         notes: notes || undefined,
         isRecurring: isRecurring || undefined,
         recurrencePattern: isRecurring ? recurrencePattern : undefined,
+        recurrenceInterval: isRecurring ? recurrenceInterval : undefined,
+        recurrenceDays: isRecurring && recurrencePattern === 'weekly' ? recurrenceDays : undefined,
         recurrenceEndDate: isRecurring && recurrenceEndDate ? new Date(recurrenceEndDate).toISOString() : undefined,
         subtasks: subtasks.length ? subtasks : undefined,
       });
@@ -257,24 +277,64 @@ export function TaskDialog({ open, onClose, onSubmit, task }: TaskDialogProps) {
                   <span className="text-xs font-medium text-muted-foreground">Recurring</span>
                 </label>
                 {isRecurring && (
-                  <div className="mt-1.5 grid grid-cols-2 gap-2">
-                    <div>
-                      <label className={labelClass}>Pattern</label>
-                      <select value={recurrencePattern} onChange={(e) => setRecurrencePattern(e.target.value as RecurrencePattern)} className={inputClass}>
-                        {RECURRENCE_OPTIONS.map((r) => (
-                          <option key={r.value} value={r.value}>{r.label}</option>
-                        ))}
-                      </select>
+                  <div className="mt-1.5 space-y-2">
+                    <div className="grid grid-cols-3 gap-2">
+                      <div>
+                        <label className={labelClass}>Every</label>
+                        <input
+                          type="number"
+                          value={recurrenceInterval}
+                          onChange={(e) => setRecurrenceInterval(Math.max(1, parseInt(e.target.value) || 1))}
+                          min={1}
+                          max={365}
+                          className={inputClass}
+                        />
+                      </div>
+                      <div>
+                        <label className={labelClass}>Pattern</label>
+                        <select value={recurrencePattern} onChange={(e) => setRecurrencePattern(e.target.value as RecurrencePattern)} className={inputClass}>
+                          {RECURRENCE_OPTIONS.map((r) => (
+                            <option key={r.value} value={r.value}>{r.label}</option>
+                          ))}
+                        </select>
+                      </div>
+                      <div>
+                        <label className={labelClass}>End Date</label>
+                        <input
+                          type="datetime-local"
+                          value={recurrenceEndDate}
+                          onChange={(e) => setRecurrenceEndDate(e.target.value)}
+                          className={inputClass}
+                        />
+                      </div>
                     </div>
-                    <div>
-                      <label className={labelClass}>End Date</label>
-                      <input
-                        type="datetime-local"
-                        value={recurrenceEndDate}
-                        onChange={(e) => setRecurrenceEndDate(e.target.value)}
-                        className={inputClass}
-                      />
-                    </div>
+                    {recurrencePattern === 'weekly' && (
+                      <div>
+                        <label className={labelClass}>On days</label>
+                        <div className="flex gap-1">
+                          {WEEKDAYS.map((day) => (
+                            <button
+                              key={day.value}
+                              type="button"
+                              onClick={() =>
+                                setRecurrenceDays((prev) =>
+                                  prev.includes(day.value)
+                                    ? prev.filter((d) => d !== day.value)
+                                    : [...prev, day.value],
+                                )
+                              }
+                              className={`flex-1 rounded-md py-1 text-xs font-medium transition-colors ${
+                                recurrenceDays.includes(day.value)
+                                  ? 'bg-primary text-primary-foreground'
+                                  : 'bg-card-hover text-muted-foreground hover:text-foreground'
+                              }`}
+                            >
+                              {day.label}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
