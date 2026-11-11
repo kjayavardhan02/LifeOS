@@ -210,31 +210,33 @@ The UI follows a **dark-first dashboard aesthetic** inspired by modern SaaS tool
 
 ### Color Tokens (Tailwind / CSS variables)
 ```
---background:        #0a0a0f       (near-black body)
---card:              #12121a       (card/surface)
---card-hover:        #1a1a26       (card hover)
---sidebar:           #0e0e16       (sidebar bg)
---sidebar-active:    #1e293b/80    (active nav item)
---border:            #1e1e2e       (subtle borders)
---border-hover:      #2a2a3e
+--background:        #0E0E0D       (charcoal body — neutral warm)
+--card:              #1A1A19       (card/panel surface)
+--card-hover:        #232629       (elevated surface / hover)
+--sidebar:           #1A1A19       (sidebar bg)
+--sidebar-active:    #232629       (active nav item highlight)
+--sidebar-active-text: #4E85DE     (active nav item text — primary blue)
+--topbar:            #161616       (top bar bg)
+--border:            #2D2A28       (subtle warm borders)
+--border-hover:      #3a3734
 
---foreground:        #e2e2e8       (primary text)
---muted:             #71717a       (secondary text)
---muted-foreground:  #a1a1aa
+--foreground:        #E5E5E3       (primary text)
+--muted:             #777572       (tertiary text / group labels)
+--muted-foreground:  #A6A39F       (secondary text)
 
---primary:           #3b82f6       (blue accent — buttons, links, active states)
---primary-hover:     #2563eb
---success:           #22c55e       (green — completed, income, positive)
---warning:           #f59e0b       (amber — warnings, pending, medium priority)
---danger:            #ef4444       (red — errors, overdue, high/urgent, expenses)
---info:              #06b6d4       (cyan — info badges, tips)
+--primary:           #4E85DE       (blue accent — buttons, links, active states)
+--primary-hover:     #6295E8
+--success:           #22A06B       (green — completed, income, positive)
+--warning:           #F4B942       (yellow — warnings, pending, medium priority)
+--danger:            #C04741       (red — errors, overdue, high/urgent)
+--info:              #DE8863       (warm orange — info badges, tips)
 
---chart-1:           #3b82f6       (blue)
---chart-2:           #8b5cf6       (violet)
---chart-3:           #f59e0b       (amber)
---chart-4:           #22c55e       (green)
---chart-5:           #ef4444       (red)
---chart-6:           #06b6d4       (cyan)
+--chart-1:           #4E85DE       (blue)
+--chart-2:           #DE8863       (warm orange)
+--chart-3:           #22A06B       (green)
+--chart-4:           #F4B942       (yellow)
+--chart-5:           #C04741       (red)
+--chart-6:           #A6A39F       (muted gray)
 ```
 
 ### Responsive Breakpoints

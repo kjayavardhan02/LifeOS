@@ -8,23 +8,26 @@ user_invocable: true
 
 ## Pre-flight Checks
 
-1. Check if Docker is running: `docker info > /dev/null 2>&1`
-2. Check if PostgreSQL and Redis containers are up: `docker compose ps`
+1. Check if PostgreSQL is running: `systemctl is-active postgresql`
+2. Check if Redis is running: `systemctl is-active redis-server`
 3. Check if ports are free: `lsof -i :5173` (frontend), `lsof -i :3001` (backend)
 
 ## Start Everything
 
 ```bash
-# 1. Start infrastructure
-docker compose up -d
+# 1. Start infrastructure (needs sudo — ask user to run if not active)
+# sudo systemctl start postgresql redis-server
 
 # 2. Wait for PostgreSQL
 until pg_isready -h localhost -p 5432 > /dev/null 2>&1; do sleep 1; done
 
-# 3. Run any pending migrations
+# 3. Verify Redis
+redis-cli ping
+
+# 4. Run any pending migrations
 cd apps/backend && npx prisma migrate deploy && cd ../..
 
-# 4. Start dev servers
+# 5. Start dev servers (runs frontend + backend concurrently)
 pnpm dev
 ```
 
@@ -41,16 +44,17 @@ pnpm dev
 lsof -ti :5173 | xargs kill -9 2>/dev/null
 lsof -ti :3001 | xargs kill -9 2>/dev/null
 
-# Stop infrastructure
-docker compose down
+# Stop infrastructure (optional — can leave running)
+# sudo systemctl stop postgresql redis-server
 ```
 
 ## Troubleshooting
 
 - Port in use: `lsof -i :<port>` to find the process, then kill it
-- Database connection refused: ensure Docker container is running with `docker compose ps`
+- Database connection refused: `systemctl is-active postgresql` — if inactive, ask user to run `sudo systemctl start postgresql`
+- Redis connection refused: `systemctl is-active redis-server` — if inactive, ask user to run `sudo systemctl start redis-server`
 - Migration errors: check `apps/backend/prisma/migrations/` for failed migrations
-- If `pnpm` not found: `npm install -g pnpm`
+- Prisma can't find DATABASE_URL: ensure `.env` exists at project root (copy from `.env.example`) — the backend has a symlink to it
 
 ## After Starting
 

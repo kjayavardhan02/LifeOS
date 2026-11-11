@@ -6,3 +6,456 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
+enum TaskStatus {
+  todo
+  in_progress
+  done
+  cancelled
+}
+
+enum Priority {
+  low
+  medium
+  high
+  urgent
+}
+
+enum RecurrencePattern {
+  daily
+  weekly
+  monthly
+  yearly
+  custom
+}
+
+enum ReminderStatus {
+  pending
+  snoozed
+  done
+  dismissed
+}
+
+enum TransactionType {
+  income
+  expense
+  transfer
+}
+
+enum BillingCycle {
+  monthly
+  quarterly
+  yearly
+}
+
+enum SubscriptionStatus {
+  active
+  paused
+  cancelled
+  trial
+  expired
+}
+
+enum ProjectStatus {
+  planning
+  active
+  on_hold
+  completed
+  archived
+}
+
+enum MilestoneStatus {
+  pending
+  in_progress
+  completed
+}
+
+model User {
+  id          String        @id @default(uuid())
+  name        String
+  email       String        @unique
+  password    String
+  avatarColor String        @default("#4E85DE")
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  settings    UserSettings?
+
+  @@map("users")
+}
+
+model UserSettings {
+  id              String  @id @default(uuid())
+  userId          String  @unique
+  mcpServerKey    String?
+  obsidianVault   String?
+  currency        String  @default("INR")
+  dateFormat      String  @default("DD/MM/YYYY")
+  weekStartsOn    String  @default("monday")
+  emailNotifications Boolean @default(true)
+  browserNotifications Boolean @default(false)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("user_settings")
+}
+
+model Task {
+  id                String            @id @default(uuid())
+  title             String
+  description       String?
+  status            TaskStatus        @default(todo)
+  priority          Priority          @default(medium)
+  category          String            @default("Personal")
+  tags              String[]          @default([])
+  dueDate           DateTime?
+  estimatedMinutes  Int?
+  isMyDay           Boolean           @default(false)
+  myDayDate         DateTime?
+  isRecurring       Boolean           @default(false)
+  recurrencePattern RecurrencePattern?
+  recurrenceEndDate DateTime?
+  notes             String?
+  projectId         String?
+  completedAt       DateTime?
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+  deletedAt         DateTime?
+
+  subtasks Subtask[]
+  project  Project?  @relation(fields: [projectId], references: [id])
+
+  @@index([status])
+  @@index([projectId])
+  @@index([priority])
+  @@index([dueDate])
+  @@index([category])
+  @@index([isMyDay])
+  @@index([deletedAt])
+  @@map("tasks")
+}
+
+model Subtask {
+  id          String   @id @default(uuid())
+  title       String
+  isCompleted Boolean  @default(false)
+  sortOrder   Int      @default(0)
+  taskId      String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  task Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
+
+  @@index([taskId])
+  @@map("subtasks")
+}
+
+model CalendarEvent {
+  id                String            @id @default(uuid())
+  title             String
+  description       String?
+  startDate         DateTime
+  endDate           DateTime
+  location          String?
+  category          String            @default("Personal")
+  color             String            @default("#4E85DE")
+  isAllDay          Boolean           @default(false)
+  isRecurring       Boolean           @default(false)
+  recurrencePattern RecurrencePattern?
+  recurrenceEndDate DateTime?
+  reminderMinutes   Int?
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+  deletedAt         DateTime?
+
+  @@index([startDate])
+  @@index([endDate])
+  @@index([category])
+  @@index([deletedAt])
+  @@map("calendar_events")
+}
+
+model Reminder {
+  id                String            @id @default(uuid())
+  title             String
+  description       String?
+  dueDate           DateTime
+  priority          Priority          @default(medium)
+  category          String            @default("Custom")
+  status            ReminderStatus    @default(pending)
+  isRecurring       Boolean           @default(false)
+  recurrencePattern RecurrencePattern?
+  recurrenceEndDate DateTime?
+  snoozedUntil      DateTime?
+  linkedModule      String?
+  linkedItemId      String?
+  notifyEmail       Boolean           @default(false)
+  notifyBrowser     Boolean           @default(true)
+  completedAt       DateTime?
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+  deletedAt         DateTime?
+
+  @@index([dueDate])
+  @@index([status])
+  @@index([priority])
+  @@index([category])
+  @@index([deletedAt])
+  @@index([linkedModule, linkedItemId])
+  @@map("reminders")
+}
+
+model FinanceTransaction {
+  id              String          @id @default(uuid())
+  amount          Float
+  type            TransactionType
+  date            DateTime
+  category        String
+  subcategory     String?
+  paymentMethod   String          @default("Cash")
+  merchant        String?
+  notes           String?
+  tags            String[]        @default([])
+  isRecurring     Boolean         @default(false)
+  recurringId     String?
+  refundOfId      String?
+  refundOf        FinanceTransaction?  @relation("Refunds", fields: [refundOfId], references: [id])
+  refunds         FinanceTransaction[] @relation("Refunds")
+  subscriptionId  String?
+  subscription    Subscription?   @relation(fields: [subscriptionId], references: [id])
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  deletedAt       DateTime?
+
+  @@index([date])
+  @@index([type])
+  @@index([category])
+  @@index([paymentMethod])
+  @@index([subscriptionId])
+  @@index([deletedAt])
+  @@map("finance_transactions")
+}
+
+model RecurringTransaction {
+  id                String            @id @default(uuid())
+  title             String
+  amount            Float
+  type              TransactionType
+  category          String
+  subcategory       String?
+  paymentMethod     String            @default("Cash")
+  merchant          String?
+  notes             String?
+  tags              String[]          @default([])
+  recurrencePattern RecurrencePattern
+  nextRunDate       DateTime
+  endDate           DateTime?
+  isActive          Boolean           @default(true)
+  lastRunAt         DateTime?
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+  deletedAt         DateTime?
+
+  @@index([nextRunDate])
+  @@index([isActive])
+  @@index([deletedAt])
+  @@map("recurring_transactions")
+}
+
+model Budget {
+  id        String    @id @default(uuid())
+  category  String?
+  amount    Float
+  month     Int
+  year      Int
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  @@unique([category, month, year])
+  @@index([month, year])
+  @@index([deletedAt])
+  @@map("budgets")
+}
+
+model Category {
+  id        String   @id @default(uuid())
+  name      String
+  type      String
+  isDefault Boolean  @default(false)
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+
+  @@unique([name, type])
+  @@index([type])
+  @@map("categories")
+}
+
+model Subscription {
+  id                 String              @id @default(uuid())
+  name               String
+  provider           String?
+  amount             Float
+  billingCycle       BillingCycle        @default(monthly)
+  nextRenewalDate    DateTime
+  paymentMethod      String              @default("Cash")
+  category           String              @default("Other")
+  status             SubscriptionStatus  @default(active)
+  startDate          DateTime
+  notes              String?
+  url                String?
+  reminderDaysBefore Int[]               @default([3])
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+  deletedAt          DateTime?
+
+  transactions FinanceTransaction[]
+
+  @@index([nextRenewalDate])
+  @@index([status])
+  @@index([category])
+  @@index([deletedAt])
+  @@map("subscriptions")
+}
+
+model Project {
+  id            String        @id @default(uuid())
+  name          String
+  description   String?
+  status        ProjectStatus @default(planning)
+  priority      Priority      @default(medium)
+  category      String        @default("Personal")
+  tags          String[]      @default([])
+  color         String        @default("#4E85DE")
+  startDate     DateTime?
+  targetEndDate DateTime?
+  notes         String?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  deletedAt     DateTime?
+
+  milestones Milestone[]
+  tasks      Task[]
+
+  @@index([status])
+  @@index([priority])
+  @@index([category])
+  @@index([deletedAt])
+  @@map("projects")
+}
+
+model Milestone {
+  id          String          @id @default(uuid())
+  title       String
+  description String?
+  targetDate  DateTime?
+  status      MilestoneStatus @default(pending)
+  projectId   String
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([projectId])
+  @@index([status])
+  @@map("milestones")
+}
+
+model KnowledgeNote {
+  id           String    @id @default(uuid())
+  title        String
+  content      String?   @db.Text
+  filePath     String?   @unique
+  folder       String    @default("/")
+  tags         String[]  @default([])
+  aliases      String[]  @default([])
+  isQuickNote  Boolean   @default(false)
+  isPinned     Boolean   @default(false)
+  isArchived   Boolean   @default(false)
+  fileSize     Int?
+  lastModified DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  deletedAt    DateTime?
+
+  @@index([folder])
+  @@index([isQuickNote])
+  @@index([isPinned])
+  @@index([isArchived])
+  @@index([deletedAt])
+  @@map("knowledge_notes")
+}
+
+model Bookmark {
+  id          String    @id @default(uuid())
+  url         String
+  title       String
+  description String?
+  favicon     String?
+  tags        String[]  @default([])
+  isPinned    Boolean   @default(false)
+  isArchived  Boolean   @default(false)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
+
+  @@index([isPinned])
+  @@index([isArchived])
+  @@index([deletedAt])
+  @@map("bookmarks")
+}
+
+model Document {
+  id             String    @id @default(uuid())
+  name           String
+  description    String?
+  category       String    @default("Other")
+  folder         String    @default("/")
+  tags           String[]  @default([])
+  documentNumber String?
+  issuer         String?
+  issueDate      DateTime?
+  expiryDate     DateTime?
+  notes          String?   @db.Text
+  storageType    String    @default("local")
+  externalUrl    String?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  deletedAt      DateTime?
+
+  files DocumentFile[]
+
+  @@index([category])
+  @@index([folder])
+  @@index([expiryDate])
+  @@index([deletedAt])
+  @@map("documents")
+}
+
+model DocumentFile {
+  id           String   @id @default(uuid())
+  documentId   String
+  document     Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  fileName     String
+  originalName String
+  mimeType     String
+  fileSize     Int
+  filePath     String
+  version      Int      @default(1)
+  label        String?
+  uploadedAt   DateTime @default(now())
+
+  @@index([documentId])
+  @@map("document_files")
+}
+
+model QuickCapture {
+  id            String   @id @default(uuid())
+  rawInput      String
+  detectedType  String
+  resolvedType  String
+  createdItemId String?
+  parsedData    Json?
+  createdAt     DateTime @default(now())
+
+  @@map("quick_captures")
+}

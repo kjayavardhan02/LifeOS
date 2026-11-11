@@ -8,7 +8,11 @@ export function validate(schema: ZodSchema, source: 'body' | 'query' | 'params' 
       next(result.error);
       return;
     }
-    req[source] = result.data;
+    if (source === 'body') {
+      req.body = result.data;
+    } else {
+      (req as Record<string, unknown>)[`validated${source.charAt(0).toUpperCase()}${source.slice(1)}`] = result.data;
+    }
     next();
   };
 }

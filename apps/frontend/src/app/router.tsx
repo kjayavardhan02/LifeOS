@@ -1,34 +1,53 @@
 import { createBrowserRouter } from 'react-router-dom';
 import { AppShell } from '@/components/layout/app-shell';
+import { AuthGuard, GuestGuard, AuthLayout, LoginPage, SignupPage } from '@/modules/auth';
 import { DashboardPage } from '@/modules/dashboard/pages/dashboard-page';
-
-function PlaceholderPage({ title }: { title: string }) {
-  return (
-    <div>
-      <h1 className="text-xl font-semibold text-foreground">{title}</h1>
-      <p className="mt-1 text-sm text-muted-foreground">Coming soon</p>
-      <div className="mt-8 flex flex-col items-center justify-center rounded-lg border border-dashed border-border py-16 text-center">
-        <p className="text-sm text-muted">This module is not yet implemented</p>
-      </div>
-    </div>
-  );
-}
+import { TasksPage } from '@/modules/tasks';
+import { CalendarPage } from '@/modules/calendar';
+import { RemindersPage } from '@/modules/reminders';
+import { ProfilePage } from '@/modules/profile/pages/profile-page';
+import { SettingsPage } from '@/modules/settings/pages/settings-page';
+import { SubscriptionsPage } from '@/modules/subscriptions';
+import { FinancePage } from '@/modules/finance';
+import { ProjectsPage, ProjectDetailPage } from '@/modules/projects';
+import { KnowledgePage } from '@/modules/knowledge';
+import { DocumentsPage } from '@/modules/documents';
+import { QuickCapturePage } from '@/modules/quick-capture';
 
 export const router = createBrowserRouter([
   {
-    element: <AppShell />,
+    element: <GuestGuard />,
     children: [
-      { path: '/', element: <DashboardPage /> },
-      { path: '/tasks', element: <PlaceholderPage title="Task Management" /> },
-      { path: '/calendar', element: <PlaceholderPage title="Calendar & Events" /> },
-      { path: '/reminders', element: <PlaceholderPage title="Reminders" /> },
-      { path: '/finance', element: <PlaceholderPage title="Finance Management" /> },
-      { path: '/subscriptions', element: <PlaceholderPage title="Subscription Manager" /> },
-      { path: '/projects', element: <PlaceholderPage title="Project Management" /> },
-      { path: '/knowledge', element: <PlaceholderPage title="Knowledge Base" /> },
-      { path: '/documents', element: <PlaceholderPage title="Document Vault" /> },
-      { path: '/capture', element: <PlaceholderPage title="Quick Capture" /> },
-      { path: '/settings', element: <PlaceholderPage title="Settings" /> },
+      {
+        element: <AuthLayout />,
+        children: [
+          { path: '/login', element: <LoginPage /> },
+          { path: '/signup', element: <SignupPage /> },
+        ],
+      },
+    ],
+  },
+  {
+    element: <AuthGuard />,
+    children: [
+      {
+        element: <AppShell />,
+        children: [
+          { path: '/', element: <DashboardPage /> },
+          { path: '/tasks', element: <TasksPage /> },
+          { path: '/calendar', element: <CalendarPage /> },
+          { path: '/reminders', element: <RemindersPage /> },
+          { path: '/finance', element: <FinancePage /> },
+          { path: '/subscriptions', element: <SubscriptionsPage /> },
+          { path: '/projects', element: <ProjectsPage /> },
+          { path: '/projects/:id', element: <ProjectDetailPage /> },
+          { path: '/knowledge', element: <KnowledgePage /> },
+          { path: '/documents', element: <DocumentsPage /> },
+          { path: '/capture', element: <QuickCapturePage /> },
+          { path: '/profile', element: <ProfilePage /> },
+          { path: '/settings', element: <SettingsPage /> },
+        ],
+      },
     ],
   },
 ]);

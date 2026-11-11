@@ -19,24 +19,22 @@ export function StatCard({ label, value, subtitle, icon: Icon, trend, className 
       )}
     >
       <div className="flex items-start justify-between">
-        <div>
-          <p className="text-xs font-medium text-muted-foreground">{label}</p>
-          <p className="mt-2 text-3xl font-bold text-foreground">{value}</p>
-          {subtitle && <p className="mt-1 text-xs text-muted">{subtitle}</p>}
-          {trend && (
-            <p
-              className={cn(
-                'mt-1 text-xs font-medium',
-                trend.positive ? 'text-success' : 'text-danger',
-              )}
-            >
-              {trend.positive ? '+' : ''}
-              {trend.value}%
-            </p>
-          )}
-        </div>
+        <p className="text-sm font-medium text-muted-foreground">{label}</p>
         <Icon className="h-5 w-5 text-muted" />
       </div>
+      <p className="mt-3 text-3xl font-bold tracking-tight text-foreground">{value}</p>
+      {subtitle && <p className="mt-1 text-sm text-muted-foreground">{subtitle}</p>}
+      {trend && (
+        <p
+          className={cn(
+            'mt-1 text-xs font-medium',
+            trend.positive ? 'text-success' : 'text-danger',
+          )}
+        >
+          {trend.positive ? '+' : ''}
+          {trend.value}%
+        </p>
+      )}
     </div>
   );
 }

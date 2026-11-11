@@ -1,4 +1,4 @@
-import { NavLink } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard,
   CheckSquare,
@@ -13,9 +13,11 @@ import {
   Settings,
   PanelLeftClose,
   PanelLeft,
+  LogOut,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useSidebarStore } from '@/stores/sidebar-store';
+import { useAuthStore } from '@/stores/auth-store';
 
 interface NavItem {
   label: string;
@@ -67,6 +69,8 @@ const navigation: NavGroup[] = [
 
 export function Sidebar() {
   const { collapsed, toggle } = useSidebarStore();
+  const logout = useAuthStore((s) => s.logout);
+  const navigate = useNavigate();
 
   return (
     <aside
@@ -86,7 +90,7 @@ export function Sidebar() {
         {navigation.map((group) => (
           <div key={group.label} className="mb-6">
             {!collapsed && (
-              <p className="mb-2 px-2 text-xs font-semibold uppercase tracking-wider text-muted">
+              <p className="mb-2 px-2 text-xs font-semibold uppercase tracking-wider text-muted animate-sidebar-label">
                 {group.label}
               </p>
             )}
@@ -99,7 +103,7 @@ export function Sidebar() {
                       cn(
                         'flex items-center gap-3 rounded-md px-2 py-2 text-sm font-medium transition-colors',
                         isActive
-                          ? 'bg-sidebar-active text-primary'
+                          ? 'bg-sidebar-active text-sidebar-active-text'
                           : 'text-muted-foreground hover:bg-card-hover hover:text-foreground',
                         collapsed && 'justify-center',
                       )
@@ -116,7 +120,18 @@ export function Sidebar() {
         ))}
       </nav>
 
-      <div className="border-t border-border p-3">
+      <div className="border-t border-border p-3 space-y-1">
+        <button
+          onClick={() => { logout(); navigate('/login'); }}
+          className={cn(
+            'flex w-full items-center gap-3 rounded-md p-2 text-muted-foreground transition-colors hover:bg-card-hover hover:text-foreground',
+            collapsed && 'justify-center',
+          )}
+          title={collapsed ? 'Logout' : undefined}
+        >
+          <LogOut className="h-4 w-4 shrink-0" />
+          {!collapsed && <span className="text-sm">Logout</span>}
+        </button>
         <button
           onClick={toggle}
           className="flex w-full items-center justify-center rounded-md p-2 text-muted-foreground transition-colors hover:bg-card-hover hover:text-foreground"
