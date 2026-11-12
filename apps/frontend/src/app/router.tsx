@@ -14,6 +14,8 @@ import { KnowledgePage } from '@/modules/knowledge';
 import { DocumentsPage } from '@/modules/documents';
 import { QuickCapturePage } from '@/modules/quick-capture';
 import { GoalsHabitsPage, GoalDetailPage } from '@/modules/goals';
+import { AnalyticsPage } from '@/modules/analytics';
+import { ReadingPage } from '@/modules/reading';
 
 export const router = createBrowserRouter([
   {
@@ -44,6 +46,8 @@ export const router = createBrowserRouter([
           { path: '/projects/:id', element: <ProjectDetailPage /> },
           { path: '/goals', element: <GoalsHabitsPage /> },
           { path: '/goals/:id', element: <GoalDetailPage /> },
+          { path: '/analytics', element: <AnalyticsPage /> },
+          { path: '/reading', element: <ReadingPage /> },
           { path: '/knowledge', element: <KnowledgePage /> },
           { path: '/documents', element: <DocumentsPage /> },
           { path: '/capture', element: <QuickCapturePage /> },

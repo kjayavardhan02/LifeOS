@@ -142,11 +142,11 @@ export const knowledgeService = {
     });
     if (!note) throw new AppError(404, 'Note not found', 'NOT_FOUND');
 
-    // For vault files, read content from disk
+    // For vault files, try to read fresh content from disk
     if (!note.isQuickNote && note.filePath) {
-      const vaultPath = await getVaultPath(userId);
-      const fullPath = join(vaultPath, note.filePath);
       try {
+        const vaultPath = await getVaultPath(userId);
+        const fullPath = join(vaultPath, note.filePath);
         const rawContent = await readFile(fullPath, 'utf-8');
         const { body } = parseFrontmatter(rawContent);
         return { ...note, content: body };

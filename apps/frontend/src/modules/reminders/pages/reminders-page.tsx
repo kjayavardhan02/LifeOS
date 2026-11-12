@@ -44,12 +44,12 @@ export function RemindersPage() {
     <div>
       <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-xl font-semibold text-foreground">Reminders</h1>
+          <h1 className="text-2xl font-bold text-foreground tracking-tight">Reminders</h1>
           <p className="mt-1 text-sm text-muted-foreground">{meta?.total ?? 0} reminders total</p>
         </div>
         <button
           onClick={() => { setEditingReminder(null); setDialogOpen(true); }}
-          className="flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary-hover transition-colors"
+          className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-[#5B9BF0] to-[#3D6FBF] px-5 py-2 text-sm font-medium text-white shadow-[0_2px_12px_rgba(91,155,240,0.3)] hover:shadow-[0_4px_20px_rgba(91,155,240,0.4)] transition-all"
         >
           <Plus className="h-4 w-4" />
           Add Reminder
@@ -73,7 +73,7 @@ export function RemindersPage() {
           <p className="mt-1 text-xs text-muted">Create your first reminder to get started</p>
           <button
             onClick={() => { setEditingReminder(null); setDialogOpen(true); }}
-            className="mt-4 flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary-hover transition-colors"
+            className="mt-4 flex items-center gap-2 rounded-xl bg-gradient-to-r from-[#5B9BF0] to-[#3D6FBF] px-5 py-2 text-sm font-medium text-white shadow-[0_2px_12px_rgba(91,155,240,0.3)] hover:shadow-[0_4px_20px_rgba(91,155,240,0.4)] transition-all"
           >
             <Plus className="h-4 w-4" />
             Create Reminder

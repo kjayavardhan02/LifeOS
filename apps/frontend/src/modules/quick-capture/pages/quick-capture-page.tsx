@@ -9,7 +9,7 @@ export function QuickCapturePage() {
       <div>
         <div className="flex items-center gap-2">
           <Zap className="h-5 w-5 text-primary" />
-          <h1 className="text-xl font-semibold text-foreground">Quick Capture</h1>
+          <h1 className="text-2xl font-bold text-foreground tracking-tight">Quick Capture</h1>
         </div>
         <p className="mt-1 text-sm text-muted-foreground">
           Type anything to quickly create tasks, expenses, notes, reminders, or events.

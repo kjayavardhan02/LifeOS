@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { X } from 'lucide-react';
 import type { Bookmark, CreateBookmarkInput, UpdateBookmarkInput } from '@lifeos/shared';
 
@@ -64,7 +65,7 @@ export function BookmarkDialog({ open, onClose, onSubmit, bookmark }: BookmarkDi
     'w-full rounded-md border border-border bg-input px-3 py-2 text-sm text-foreground placeholder:text-muted outline-none focus:border-primary focus:ring-1 focus:ring-primary';
   const labelClass = 'block text-sm font-medium text-muted-foreground mb-1.5';
 
-  return (
+  return createPortal(
     <div className="fixed inset-0 z-50 flex items-start justify-center pt-[10vh]">
       <div className="fixed inset-0 bg-black/60 animate-overlay-in" onClick={onClose} />
       <div className="relative z-10 w-full max-w-lg rounded-lg border border-border bg-card shadow-2xl max-h-[80vh] overflow-y-auto animate-dialog-in">
@@ -145,6 +146,7 @@ export function BookmarkDialog({ open, onClose, onSubmit, bookmark }: BookmarkDi
           </div>
         </form>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }

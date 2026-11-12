@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import { Folder, FolderOpen, ChevronRight, ArrowUp, Home, X, Check, Loader2 } from 'lucide-react';
 import { api } from '@/lib/api';
 
@@ -61,7 +62,7 @@ export function FolderPickerDialog({ open, onClose, onSelect, initialPath }: Fol
 
   if (!open) return null;
 
-  return (
+  return createPortal(
     <div className="fixed inset-0 z-50 flex items-center justify-center">
       <div className="absolute inset-0 bg-black/60 animate-overlay-in" onClick={onClose} />
       <div className="relative w-full max-w-lg rounded-lg border border-border bg-card shadow-xl animate-dialog-in mx-4">
@@ -172,6 +173,7 @@ export function FolderPickerDialog({ open, onClose, onSelect, initialPath }: Fol
           </div>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }

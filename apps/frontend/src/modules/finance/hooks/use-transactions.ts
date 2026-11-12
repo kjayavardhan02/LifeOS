@@ -7,6 +7,7 @@ import type {
   UpdateTransactionInput,
   TransactionFilters,
   FinanceSummary,
+  FinanceComparison,
   PaginatedResponse,
   ApiResponse,
   PaginationParams,
@@ -65,6 +66,16 @@ export function useFinanceSummary(month: number, year: number) {
     queryFn: () =>
       api.get<ApiResponse<FinanceSummary>>(
         `/finance/transactions/summary?month=${month}&year=${year}`,
+      ),
+  });
+}
+
+export function useFinanceComparison(month: number, year: number) {
+  return useQuery({
+    queryKey: [...TRANSACTIONS_KEY, 'comparison', month, year],
+    queryFn: () =>
+      api.get<ApiResponse<FinanceComparison>>(
+        `/finance/transactions/comparison?month=${month}&year=${year}`,
       ),
   });
 }

@@ -1,0 +1,15 @@
+{
+  "mcpServers": {
+    "lifeos": {
+      "command": "node",
+      "args": [
+        "/home/jayavardhan/Desktop/claude_work/LifeOS/node_modules/.pnpm/tsx@4.23.15/node_modules/tsx/dist/cli.mjs",
+        "/home/jayavardhan/Desktop/claude_work/LifeOS/apps/mcp-server/src/server.ts"
+      ],
+      "cwd": "/home/jayavardhan/Desktop/claude_work/LifeOS/apps/mcp-server",
+      "env": {
+        "DATABASE_URL": "postgresql://lifeos:lifeos_dev@localhost:5432/lifeos?schema=public"
+      }
+    }
+  }
+}

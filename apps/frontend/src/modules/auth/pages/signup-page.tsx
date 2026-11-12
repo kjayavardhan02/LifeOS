@@ -47,13 +47,11 @@ export function SignupPage() {
 
         <div className="relative z-10 flex flex-1 flex-col justify-center px-16">
           <div className="mb-3 flex items-center gap-3">
-            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary text-lg font-bold text-primary-foreground shadow-lg shadow-primary/25">
-              L
-            </div>
-            <span className="text-2xl font-bold text-foreground">LifeOS</span>
+            <img src="/Logo.png" alt="AVENLO" className="h-11 w-11 rounded-xl object-contain" />
+            <span className="text-2xl font-bold text-foreground tracking-tight">AVENLO</span>
           </div>
           <p className="mb-10 max-w-md text-lg text-muted-foreground">
-            Your centralized personal management platform. Everything you need, in one place.
+            Your Life. In Sync.
           </p>
 
           <div className="grid grid-cols-2 gap-3">
@@ -80,16 +78,14 @@ export function SignupPage() {
         <div className="w-full max-w-sm animate-page-in">
           {/* Mobile-only logo */}
           <div className="mb-8 flex items-center justify-center gap-2.5 lg:hidden">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary text-base font-bold text-primary-foreground">
-              L
-            </div>
-            <span className="text-xl font-bold text-foreground">LifeOS</span>
+            <img src="/Logo.png" alt="AVENLO" className="h-10 w-10 rounded-xl object-contain" />
+            <span className="text-xl font-bold text-foreground">AVENLO</span>
           </div>
 
           <div className="mb-8">
             <h1 className="text-2xl font-bold text-foreground">Create your account</h1>
             <p className="mt-1 text-sm text-muted-foreground">
-              Set up LifeOS in under a minute
+              Set up AVENLO in under a minute
             </p>
           </div>
 

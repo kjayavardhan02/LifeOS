@@ -7,6 +7,7 @@ import {
   useUpdateTransaction,
   useDeleteTransaction,
   useFinanceSummary,
+  useFinanceComparison,
 } from '../hooks/use-transactions';
 import {
   useBudgets,
@@ -21,6 +22,7 @@ import { TransactionDialog } from '../components/transaction-dialog';
 import { TransactionDetailPanel } from '../components/transaction-detail-panel';
 import { BudgetCard } from '../components/budget-card';
 import { BudgetDialog } from '../components/budget-dialog';
+import { MonthComparison } from '../components/month-comparison';
 import type {
   FinanceTransaction,
   TransactionFilters as TransactionFiltersType,
@@ -36,7 +38,7 @@ const MONTHS = [
   'July', 'August', 'September', 'October', 'November', 'December',
 ];
 
-type Tab = 'transactions' | 'budgets';
+type Tab = 'transactions' | 'budgets' | 'compare';
 
 export function FinancePage() {
   const now = new Date();
@@ -69,6 +71,8 @@ export function FinancePage() {
 
   const { data: budgetResponse, isLoading: budgetsLoading } = useBudgets(month, year);
   const budgets = budgetResponse?.data ?? [];
+
+  const { data: comparisonResponse, isLoading: comparisonLoading } = useFinanceComparison(month, year);
 
   // Mutations
   const createTx = useCreateTransaction();
@@ -137,10 +141,10 @@ export function FinancePage() {
   return (
     <div>
       {/* Header */}
-      <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+      <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between animate-page-in">
         <div>
-          <h1 className="text-xl font-semibold text-foreground">Finance</h1>
-          <p className="mt-1 text-sm text-muted-foreground">
+          <h1 className="text-2xl font-bold text-foreground tracking-tight">Finance</h1>
+          <p className="mt-1 text-sm text-muted">
             Track your income, expenses, and budgets
           </p>
         </div>
@@ -172,18 +176,22 @@ export function FinancePage() {
 
       {/* Tabs */}
       <div className="mb-4 flex items-center gap-6 border-b border-border">
-        {(['transactions', 'budgets'] as const).map((t) => (
+        {([
+          { key: 'transactions', label: 'Transactions' },
+          { key: 'budgets', label: 'Budgets' },
+          { key: 'compare', label: 'Compare' },
+        ] as const).map((t) => (
           <button
-            key={t}
-            onClick={() => setTab(t)}
+            key={t.key}
+            onClick={() => setTab(t.key)}
             className={cn(
               'pb-2 text-sm font-medium transition-colors border-b-2 -mb-px',
-              tab === t
+              tab === t.key
                 ? 'border-primary text-primary'
                 : 'border-transparent text-muted-foreground hover:text-foreground',
             )}
           >
-            {t.charAt(0).toUpperCase() + t.slice(1)}
+            {t.label}
           </button>
         ))}
       </div>
@@ -198,7 +206,7 @@ export function FinancePage() {
                 setEditingTx(null);
                 setTxDialogOpen(true);
               }}
-              className="flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary-hover transition-colors shrink-0"
+              className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-[#5B9BF0] to-[#3D6FBF] px-5 py-2 text-sm font-medium text-white shadow-[0_2px_12px_rgba(91,155,240,0.3)] hover:shadow-[0_4px_20px_rgba(91,155,240,0.4)] transition-all hover:scale-[1.02] active:scale-[0.98] shrink-0"
             >
               <Plus className="h-4 w-4" />
               Add Transaction
@@ -228,7 +236,7 @@ export function FinancePage() {
                   setEditingTx(null);
                   setTxDialogOpen(true);
                 }}
-                className="mt-4 flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary-hover transition-colors"
+                className="mt-4 flex items-center gap-2 rounded-xl bg-gradient-to-r from-[#5B9BF0] to-[#3D6FBF] px-5 py-2 text-sm font-medium text-white shadow-[0_2px_12px_rgba(91,155,240,0.3)] hover:shadow-[0_4px_20px_rgba(91,155,240,0.4)] transition-all"
               >
                 <Plus className="h-4 w-4" />
                 Add Transaction
@@ -303,7 +311,7 @@ export function FinancePage() {
                 setEditingBudget(null);
                 setBudgetDialogOpen(true);
               }}
-              className="flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary-hover transition-colors"
+              className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-[#5B9BF0] to-[#3D6FBF] px-5 py-2 text-sm font-medium text-white shadow-[0_2px_12px_rgba(91,155,240,0.3)] hover:shadow-[0_4px_20px_rgba(91,155,240,0.4)] transition-all"
             >
               <Plus className="h-4 w-4" />
               Add Budget
@@ -333,7 +341,7 @@ export function FinancePage() {
                   setEditingBudget(null);
                   setBudgetDialogOpen(true);
                 }}
-                className="mt-4 flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary-hover transition-colors"
+                className="mt-4 flex items-center gap-2 rounded-xl bg-gradient-to-r from-[#5B9BF0] to-[#3D6FBF] px-5 py-2 text-sm font-medium text-white shadow-[0_2px_12px_rgba(91,155,240,0.3)] hover:shadow-[0_4px_20px_rgba(91,155,240,0.4)] transition-all"
               >
                 <Plus className="h-4 w-4" />
                 Create Budget
@@ -368,6 +376,11 @@ export function FinancePage() {
             year={year}
           />
         </div>
+      )}
+
+      {/* Compare Tab */}
+      {tab === 'compare' && (
+        <MonthComparison data={comparisonResponse?.data} isLoading={comparisonLoading} />
       )}
 
       <TransactionDetailPanel

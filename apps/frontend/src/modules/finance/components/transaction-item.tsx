@@ -44,7 +44,7 @@ export function TransactionItem({ transaction, onEdit, onDelete, onClick }: Tran
 
   return (
     <div
-      className="group flex items-center gap-3 rounded-lg border border-border bg-card p-3 transition-colors hover:bg-card-hover cursor-pointer"
+      className="group flex items-center gap-3 rounded-xl border border-border bg-card p-3 transition-all hover:bg-card-hover/50 hover:border-border-hover cursor-pointer"
       onClick={() => onClick?.(transaction)}
     >
       <div className={cn('flex h-9 w-9 shrink-0 items-center justify-center rounded-lg', config.bgClass)}>

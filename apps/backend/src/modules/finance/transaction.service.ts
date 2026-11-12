@@ -144,6 +144,97 @@ export const transactionService = {
     };
   },
 
+  async getComparison(month: number, year: number) {
+    const currStart = new Date(year, month - 1, 1);
+    const currEnd = new Date(year, month, 0, 23, 59, 59, 999);
+
+    const prevMonth = month === 1 ? 12 : month - 1;
+    const prevYear = month === 1 ? year - 1 : year;
+    const prevStart = new Date(prevYear, prevMonth - 1, 1);
+    const prevEnd = new Date(prevYear, prevMonth, 0, 23, 59, 59, 999);
+
+    const MONTHS = [
+      'January', 'February', 'March', 'April', 'May', 'June',
+      'July', 'August', 'September', 'October', 'November', 'December',
+    ];
+
+    const [currTx, prevTx] = await Promise.all([
+      prisma.financeTransaction.findMany({
+        where: { deletedAt: null, date: { gte: currStart, lte: currEnd } },
+      }),
+      prisma.financeTransaction.findMany({
+        where: { deletedAt: null, date: { gte: prevStart, lte: prevEnd } },
+      }),
+    ]);
+
+    function buildMonthSummary(
+      transactions: typeof currTx,
+      m: number,
+      y: number,
+    ) {
+      let totalIncome = 0;
+      let totalExpense = 0;
+      const catMap = new Map<string, number>();
+
+      for (const tx of transactions) {
+        if (tx.type === 'income') totalIncome += tx.amount;
+        else if (tx.type === 'expense') {
+          totalExpense += tx.amount;
+          catMap.set(tx.category, (catMap.get(tx.category) ?? 0) + tx.amount);
+        }
+      }
+
+      const savings = totalIncome - totalExpense;
+      const savingsRate = totalIncome > 0 ? Math.round(((savings) / totalIncome) * 100 * 100) / 100 : 0;
+
+      return {
+        label: `${MONTHS[m - 1]} ${y}`,
+        totalIncome: Math.round(totalIncome * 100) / 100,
+        totalExpense: Math.round(totalExpense * 100) / 100,
+        savings: Math.round(savings * 100) / 100,
+        savingsRate,
+        transactionCount: transactions.length,
+        categoryBreakdown: Array.from(catMap.entries())
+          .map(([category, amount]) => ({ category, amount: Math.round(amount * 100) / 100 }))
+          .sort((a, b) => b.amount - a.amount),
+      };
+    }
+
+    const current = buildMonthSummary(currTx, month, year);
+    const previous = buildMonthSummary(prevTx, prevMonth, prevYear);
+
+    const pctChange = (curr: number, prev: number) =>
+      prev !== 0 ? Math.round(((curr - prev) / Math.abs(prev)) * 100 * 100) / 100 : curr > 0 ? 100 : 0;
+
+    const allCategories = new Set([
+      ...current.categoryBreakdown.map((c) => c.category),
+      ...previous.categoryBreakdown.map((c) => c.category),
+    ]);
+
+    const prevCatMap = new Map(previous.categoryBreakdown.map((c) => [c.category, c.amount]));
+    const currCatMap = new Map(current.categoryBreakdown.map((c) => [c.category, c.amount]));
+
+    const categoryComparison = Array.from(allCategories)
+      .map((category) => {
+        const c = currCatMap.get(category) ?? 0;
+        const p = prevCatMap.get(category) ?? 0;
+        return { category, current: c, previous: p, delta: pctChange(c, p) };
+      })
+      .sort((a, b) => b.current - a.current);
+
+    return {
+      current,
+      previous,
+      deltas: {
+        income: pctChange(current.totalIncome, previous.totalIncome),
+        expense: pctChange(current.totalExpense, previous.totalExpense),
+        savings: pctChange(current.savings, previous.savings),
+        savingsRate: Math.round((current.savingsRate - previous.savingsRate) * 100) / 100,
+      },
+      categoryComparison,
+    };
+  },
+
   async getRecent(limit: number) {
     return prisma.financeTransaction.findMany({
       where: { deletedAt: null },

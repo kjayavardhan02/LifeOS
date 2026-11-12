@@ -75,7 +75,7 @@ export function SettingsPage() {
     return (
       <div className="mx-auto max-w-2xl">
         <div className="mb-8">
-          <h1 className="text-xl font-semibold text-foreground">Settings</h1>
+          <h1 className="text-2xl font-bold text-foreground tracking-tight">Settings</h1>
           <p className="mt-1 text-sm text-muted-foreground">Loading...</p>
         </div>
       </div>
@@ -85,8 +85,8 @@ export function SettingsPage() {
   return (
     <div className="mx-auto max-w-2xl">
       <div className="mb-8">
-        <h1 className="text-xl font-semibold text-foreground">Settings</h1>
-        <p className="mt-1 text-sm text-muted-foreground">Configure your LifeOS preferences</p>
+        <h1 className="text-2xl font-bold text-foreground tracking-tight">Settings</h1>
+        <p className="mt-1 text-sm text-muted-foreground">Configure your AVENLO preferences</p>
       </div>
 
       <div className="space-y-6">
@@ -107,7 +107,7 @@ export function SettingsPage() {
                 className="h-10 w-full rounded-lg border border-border bg-input px-3 text-sm text-foreground placeholder:text-muted outline-none transition-colors focus:border-primary focus:ring-1 focus:ring-primary"
                 placeholder="Enter your MCP server key"
               />
-              <p className="mt-1 text-xs text-muted">Used to authenticate with the LifeOS MCP server for AI integrations</p>
+              <p className="mt-1 text-xs text-muted">Used to authenticate with the AVENLO MCP server for AI integrations</p>
             </div>
 
             <div>

@@ -141,3 +141,30 @@ export interface FinanceSummary {
   categoryBreakdown: { category: string; amount: number; percentage: number }[];
   dailyTrend: { date: string; income: number; expense: number }[];
 }
+
+export interface MonthSummary {
+  label: string;
+  totalIncome: number;
+  totalExpense: number;
+  savings: number;
+  savingsRate: number;
+  transactionCount: number;
+  categoryBreakdown: { category: string; amount: number }[];
+}
+
+export interface FinanceComparison {
+  current: MonthSummary;
+  previous: MonthSummary;
+  deltas: {
+    income: number;
+    expense: number;
+    savings: number;
+    savingsRate: number;
+  };
+  categoryComparison: {
+    category: string;
+    current: number;
+    previous: number;
+    delta: number;
+  }[];
+}

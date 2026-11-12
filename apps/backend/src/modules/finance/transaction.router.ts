@@ -31,6 +31,16 @@ transactionRouter.get('/summary', validate(summaryQuerySchema, 'query'), async (
   }
 });
 
+transactionRouter.get('/comparison', validate(summaryQuerySchema, 'query'), async (req, res, next) => {
+  try {
+    const { month, year } = (req as unknown as Record<string, unknown>).validatedQuery as { month: number; year: number };
+    const data = await transactionService.getComparison(month, year);
+    res.json({ data });
+  } catch (err) {
+    next(err);
+  }
+});
+
 transactionRouter.get('/recent', validate(recentQuerySchema, 'query'), async (req, res, next) => {
   try {
     const { limit } = (req as unknown as Record<string, unknown>).validatedQuery as { limit: number };

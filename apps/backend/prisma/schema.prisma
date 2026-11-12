@@ -616,3 +616,78 @@ model QuickCapture {
 
   @@map("quick_captures")
 }
+
+enum ContentType {
+  article
+  book
+  video
+  podcast
+}
+
+enum ContentStatus {
+  queued
+  in_progress
+  completed
+  dropped
+}
+
+model ContentItem {
+  id           String        @id @default(uuid())
+  title        String
+  url          String?
+  type         ContentType   @default(article)
+  status       ContentStatus @default(queued)
+  category     String        @default("General")
+  tags         String[]      @default([])
+  rating       Int?
+  notes        String?       @db.Text
+  source       String?
+  currentPage  Int?
+  totalPages   Int?
+  isFavorite   Boolean       @default(false)
+  collectionId String?
+  completedAt  DateTime?
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  deletedAt    DateTime?
+
+  collection   ContentCollection? @relation(fields: [collectionId], references: [id])
+  highlights   ContentHighlight[]
+
+  @@index([type])
+  @@index([status])
+  @@index([category])
+  @@index([isFavorite])
+  @@index([collectionId])
+  @@index([deletedAt])
+  @@map("content_items")
+}
+
+model ContentCollection {
+  id          String   @id @default(uuid())
+  name        String
+  description String?
+  color       String   @default("#4E85DE")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  deletedAt   DateTime?
+
+  items ContentItem[]
+
+  @@index([deletedAt])
+  @@map("content_collections")
+}
+
+model ContentHighlight {
+  id            String   @id @default(uuid())
+  contentItemId String
+  text          String   @db.Text
+  note          String?
+  sortOrder     Int      @default(0)
+  createdAt     DateTime @default(now())
+
+  contentItem ContentItem @relation(fields: [contentItemId], references: [id], onDelete: Cascade)
+
+  @@index([contentItemId])
+  @@map("content_highlights")
+}

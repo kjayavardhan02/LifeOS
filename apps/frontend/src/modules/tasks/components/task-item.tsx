@@ -2,10 +2,17 @@ import { Circle, CheckCircle2, ChevronRight, Calendar as CalendarIcon, Clock, St
 import { cn } from '@/lib/utils';
 import { PriorityBadge } from './priority-badge';
 import { StatusBadge } from './status-badge';
-import type { Task } from '@lifeos/shared';
+import type { Task, Priority } from '@lifeos/shared';
 import { format, isPast, isToday } from 'date-fns';
 
 const DAY_LABELS: Record<string, string> = { mon: 'Mon', tue: 'Tue', wed: 'Wed', thu: 'Thu', fri: 'Fri', sat: 'Sat', sun: 'Sun' };
+
+const PRIORITY_ACCENT: Record<Priority, string> = {
+  urgent: 'border-l-[#E05A52]',
+  high: 'border-l-[#F5C344]',
+  medium: 'border-l-[#5B9BF0]',
+  low: 'border-l-[#6B6966]',
+};
 
 function formatRecurrence(task: Task): string {
   const interval = task.recurrenceInterval ?? 1;
@@ -35,8 +42,9 @@ export function TaskItem({ task, onToggleStatus, onToggleMyDay, onClick }: TaskI
   return (
     <div
       className={cn(
-        'group flex items-center gap-3 rounded-lg border border-border bg-card px-4 py-3 transition-colors hover:border-border-hover cursor-pointer',
-        isDone && 'opacity-60',
+        'group flex items-center gap-3 rounded-xl border border-border border-l-[3px] bg-card px-4 py-3 transition-all hover:border-border-hover hover:bg-card-hover/50 cursor-pointer',
+        PRIORITY_ACCENT[task.priority],
+        isDone && 'opacity-50',
       )}
       onClick={() => onClick(task)}
     >
@@ -45,7 +53,7 @@ export function TaskItem({ task, onToggleStatus, onToggleMyDay, onClick }: TaskI
           e.stopPropagation();
           onToggleStatus(task);
         }}
-        className="shrink-0 text-muted-foreground hover:text-primary transition-colors"
+        className="shrink-0 text-muted-foreground hover:text-primary transition-colors hover:scale-110 active:scale-95"
       >
         {isDone ? (
           <CheckCircle2 className="h-5 w-5 text-success" />
@@ -61,18 +69,18 @@ export function TaskItem({ task, onToggleStatus, onToggleMyDay, onClick }: TaskI
           </span>
         </div>
 
-        <div className="mt-1 flex flex-wrap items-center gap-2">
+        <div className="mt-1.5 flex flex-wrap items-center gap-2">
           <PriorityBadge priority={task.priority} />
           <StatusBadge status={task.status} />
 
           {task.category && (
-            <span className="text-xs text-muted-foreground">{task.category}</span>
+            <span className="text-xs text-muted">{task.category}</span>
           )}
 
           {task.dueDate && (
             <span className={cn(
-              'flex items-center gap-1 text-xs',
-              isOverdue ? 'text-danger' : isDueToday ? 'text-warning' : 'text-muted-foreground',
+              'flex items-center gap-1 text-xs font-medium',
+              isOverdue ? 'text-[#E05A52]' : isDueToday ? 'text-[#F5C344]' : 'text-muted',
             )}>
               <CalendarIcon className="h-3 w-3" />
               {format(new Date(task.dueDate), 'MMM d')}
@@ -80,27 +88,27 @@ export function TaskItem({ task, onToggleStatus, onToggleMyDay, onClick }: TaskI
           )}
 
           {task.estimatedMinutes && (
-            <span className="flex items-center gap-1 text-xs text-muted-foreground">
+            <span className="flex items-center gap-1 text-xs text-muted">
               <Clock className="h-3 w-3" />
               {task.estimatedMinutes}m
             </span>
           )}
 
           {task.isRecurring && (
-            <span className="flex items-center gap-1 text-xs text-primary">
+            <span className="flex items-center gap-1 rounded-md bg-[#5B9BF0]/10 px-1.5 py-0.5 text-xs font-medium text-[#5B9BF0]">
               <Repeat className="h-3 w-3" />
               {formatRecurrence(task)}
             </span>
           )}
 
           {task.subtasks.length > 0 && (
-            <span className="text-xs text-muted-foreground">
+            <span className="text-xs text-muted">
               {completedSubtasks}/{task.subtasks.length} subtasks
             </span>
           )}
 
           {task.tags.map((tag) => (
-            <span key={tag} className="rounded bg-card-hover px-1.5 py-0.5 text-xs text-muted-foreground">
+            <span key={tag} className="rounded-md bg-card-hover px-1.5 py-0.5 text-[10px] font-medium text-muted uppercase tracking-wider">
               {tag}
             </span>
           ))}
@@ -113,13 +121,13 @@ export function TaskItem({ task, onToggleStatus, onToggleMyDay, onClick }: TaskI
             e.stopPropagation();
             onToggleMyDay(task);
           }}
-          className="shrink-0 text-muted-foreground hover:text-warning transition-colors"
+          className="shrink-0 text-muted-foreground hover:text-warning transition-all hover:scale-110"
           title={task.isMyDay ? 'Remove from My Day' : 'Add to My Day'}
         >
           <Star className={cn('h-4 w-4', task.isMyDay && 'fill-warning text-warning')} />
         </button>
       )}
-      <ChevronRight className="h-4 w-4 shrink-0 text-muted opacity-0 group-hover:opacity-100 transition-opacity" />
+      <ChevronRight className="h-4 w-4 shrink-0 text-muted opacity-0 group-hover:opacity-100 transition-all group-hover:translate-x-0.5" />
     </div>
   );
 }

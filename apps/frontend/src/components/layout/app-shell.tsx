@@ -14,7 +14,7 @@ export function AppShell() {
       <Sidebar />
       <div className={cn('transition-all duration-200', collapsed ? 'ml-16' : 'ml-64')}>
         <TopBar />
-        <main className="p-6">
+        <main className="p-6 max-w-[1600px]">
           <div className="animate-page-in">
             <Outlet />
           </div>
@@ -28,19 +28,21 @@ export function AppShell() {
             background: 'var(--color-card)',
             border: '1px solid var(--color-border)',
             color: 'var(--color-foreground)',
+            borderRadius: '12px',
+            fontSize: '14px',
           },
           success: {
             style: {
-              background: '#22A06B',
-              color: '#ffffff',
-              border: '1px solid #22A06B',
+              background: '#151514',
+              color: '#2BD47D',
+              border: '1px solid rgba(43, 212, 125, 0.2)',
             },
           },
           error: {
             style: {
-              background: '#C04741',
-              color: '#ffffff',
-              border: '1px solid #C04741',
+              background: '#151514',
+              color: '#E05A52',
+              border: '1px solid rgba(224, 90, 82, 0.2)',
             },
           },
         }}

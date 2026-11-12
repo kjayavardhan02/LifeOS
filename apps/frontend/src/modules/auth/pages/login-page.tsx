@@ -46,13 +46,11 @@ export function LoginPage() {
 
         <div className="relative z-10 flex flex-1 flex-col justify-center px-16">
           <div className="mb-3 flex items-center gap-3">
-            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary text-lg font-bold text-primary-foreground shadow-lg shadow-primary/25">
-              L
-            </div>
-            <span className="text-2xl font-bold text-foreground">LifeOS</span>
+            <img src="/Logo.png" alt="AVENLO" className="h-11 w-11 rounded-xl object-contain" />
+            <span className="text-2xl font-bold text-foreground tracking-tight">AVENLO</span>
           </div>
           <p className="mb-10 max-w-md text-lg text-muted-foreground">
-            Your centralized personal management platform. Everything you need, in one place.
+            Your Life. In Sync.
           </p>
 
           <div className="grid grid-cols-2 gap-3">
@@ -79,10 +77,8 @@ export function LoginPage() {
         <div className="w-full max-w-sm animate-page-in">
           {/* Mobile-only logo */}
           <div className="mb-8 flex items-center justify-center gap-2.5 lg:hidden">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary text-base font-bold text-primary-foreground">
-              L
-            </div>
-            <span className="text-xl font-bold text-foreground">LifeOS</span>
+            <img src="/Logo.png" alt="AVENLO" className="h-10 w-10 rounded-xl object-contain" />
+            <span className="text-xl font-bold text-foreground">AVENLO</span>
           </div>
 
           <div className="mb-8">
@@ -141,7 +137,7 @@ export function LoginPage() {
             <button
               type="submit"
               disabled={login.isPending}
-              className="flex h-10 w-full items-center justify-center gap-2 rounded-lg bg-primary text-sm font-medium text-primary-foreground shadow-sm shadow-primary/25 transition-all hover:bg-primary-hover hover:shadow-md hover:shadow-primary/30 disabled:opacity-50 disabled:shadow-none"
+              className="flex h-10 w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#5B9BF0] to-[#3D6FBF] text-sm font-medium text-white shadow-[0_2px_12px_rgba(91,155,240,0.3)] transition-all hover:shadow-[0_4px_20px_rgba(91,155,240,0.4)] hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50 disabled:shadow-none"
             >
               {login.isPending ? (
                 <span className="h-4 w-4 animate-spin rounded-full border-2 border-primary-foreground border-t-transparent" />

@@ -1,0 +1,15 @@
+export { taskService } from '../../backend/src/modules/tasks/task.service.js';
+export { eventService } from '../../backend/src/modules/calendar/event.service.js';
+export { reminderService } from '../../backend/src/modules/reminders/reminder.service.js';
+export { transactionService } from '../../backend/src/modules/finance/transaction.service.js';
+export { budgetService } from '../../backend/src/modules/finance/budget.service.js';
+export { subscriptionService } from '../../backend/src/modules/subscriptions/subscription.service.js';
+export { projectService } from '../../backend/src/modules/projects/project.service.js';
+export { knowledgeService } from '../../backend/src/modules/knowledge/knowledge.service.js';
+export { documentService } from '../../backend/src/modules/documents/document.service.js';
+export { quickCaptureService } from '../../backend/src/modules/quick-capture/quick-capture.service.js';
+export { searchService } from '../../backend/src/modules/search/search.service.js';
+export { goalService } from '../../backend/src/modules/goals/goal.service.js';
+export { habitService } from '../../backend/src/modules/goals/habit.service.js';
+export { readingService } from '../../backend/src/modules/reading/reading.service.js';
+export { getProductivityStats, getFinanceStats, getHabitStats, getGoalStats } from '../../backend/src/modules/analytics/analytics.service.js';

@@ -12,3 +12,5 @@ export * from './knowledge';
 export * from './quick-capture';
 export * from './search';
 export * from './goal';
+export * from './analytics';
+export * from './reading';

@@ -149,7 +149,7 @@ export function KnowledgePage() {
       {/* Header */}
       <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-xl font-semibold text-foreground">Knowledge Base</h1>
+          <h1 className="text-2xl font-bold text-foreground tracking-tight">Knowledge Base</h1>
           <p className="mt-1 text-sm text-muted-foreground">
             Browse your Obsidian vault and quick notes
           </p>
@@ -168,7 +168,7 @@ export function KnowledgePage() {
               setEditingNote(null);
               setNoteDialogOpen(true);
             }}
-            className="flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary-hover transition-colors"
+            className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-[#5B9BF0] to-[#3D6FBF] px-5 py-2 text-sm font-medium text-white shadow-[0_2px_12px_rgba(91,155,240,0.3)] hover:shadow-[0_4px_20px_rgba(91,155,240,0.4)] transition-all"
           >
             <Plus className="h-4 w-4" />
             New Note
@@ -205,7 +205,7 @@ export function KnowledgePage() {
             </div>
             <button
               onClick={() => setFolderPickerOpen(true)}
-              className="shrink-0 flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary-hover transition-colors"
+              className="shrink-0 flex items-center gap-2 rounded-xl bg-gradient-to-r from-[#5B9BF0] to-[#3D6FBF] px-5 py-2 text-sm font-medium text-white shadow-[0_2px_12px_rgba(91,155,240,0.3)] hover:shadow-[0_4px_20px_rgba(91,155,240,0.4)] transition-all"
             >
               <FolderOpen className="h-4 w-4" />
               Select Vault Folder
@@ -420,7 +420,7 @@ export function KnowledgePage() {
                           setEditingNote(null);
                           setNoteDialogOpen(true);
                         }}
-                        className="flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary-hover transition-colors"
+                        className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-[#5B9BF0] to-[#3D6FBF] px-5 py-2 text-sm font-medium text-white shadow-[0_2px_12px_rgba(91,155,240,0.3)] hover:shadow-[0_4px_20px_rgba(91,155,240,0.4)] transition-all"
                       >
                         <Plus className="h-4 w-4" />
                         Create Note
@@ -483,7 +483,7 @@ export function KnowledgePage() {
                     setEditingBookmark(null);
                     setBookmarkDialogOpen(true);
                   }}
-                  className="ml-3 flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary-hover transition-colors shrink-0"
+                  className="ml-3 flex items-center gap-2 rounded-xl bg-gradient-to-r from-[#5B9BF0] to-[#3D6FBF] px-5 py-2 text-sm font-medium text-white shadow-[0_2px_12px_rgba(91,155,240,0.3)] hover:shadow-[0_4px_20px_rgba(91,155,240,0.4)] transition-all shrink-0"
                 >
                   <Plus className="h-4 w-4" />
                   Add Bookmark
@@ -508,7 +508,7 @@ export function KnowledgePage() {
                       setEditingBookmark(null);
                       setBookmarkDialogOpen(true);
                     }}
-                    className="mt-4 flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary-hover transition-colors"
+                    className="mt-4 flex items-center gap-2 rounded-xl bg-gradient-to-r from-[#5B9BF0] to-[#3D6FBF] px-5 py-2 text-sm font-medium text-white shadow-[0_2px_12px_rgba(91,155,240,0.3)] hover:shadow-[0_4px_20px_rgba(91,155,240,0.4)] transition-all"
                   >
                     <Plus className="h-4 w-4" />
                     Add Bookmark

@@ -65,12 +65,12 @@ export function TasksPage() {
 
   return (
     <div>
-      <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+      <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between animate-page-in">
         <div>
-          <h1 className="text-xl font-semibold text-foreground">
+          <h1 className="text-2xl font-bold text-foreground tracking-tight">
             {view === 'myday' ? 'My Day' : 'Task Management'}
           </h1>
-          <p className="mt-1 text-sm text-muted-foreground">
+          <p className="mt-1 text-sm text-muted">
             {view === 'myday'
               ? 'Your curated focus for today'
               : `${meta?.total ?? 0} tasks total`}
@@ -78,16 +78,16 @@ export function TasksPage() {
         </div>
 
         <div className="flex items-center gap-3">
-          <div className="flex rounded-md border border-border">
+          <div className="flex rounded-xl border border-border bg-card p-1">
             {viewOptions.map(({ mode, label, icon: Icon }) => (
               <button
                 key={mode}
                 onClick={() => setView(mode)}
                 className={cn(
-                  'flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium transition-colors first:rounded-l-md last:rounded-r-md',
+                  'flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium transition-all rounded-lg',
                   view === mode
-                    ? 'bg-primary text-primary-foreground'
-                    : 'text-muted-foreground hover:text-foreground',
+                    ? 'bg-[#5B9BF0] text-white shadow-[0_2px_8px_rgba(91,155,240,0.3)]'
+                    : 'text-muted hover:text-foreground',
                 )}
               >
                 <Icon className="h-3.5 w-3.5" />
@@ -98,7 +98,7 @@ export function TasksPage() {
 
           <button
             onClick={() => { setEditingTask(null); setDialogOpen(true); }}
-            className="flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary-hover transition-colors"
+            className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-[#5B9BF0] to-[#3D6FBF] px-5 py-2 text-sm font-medium text-white shadow-[0_2px_12px_rgba(91,155,240,0.3)] hover:shadow-[0_4px_20px_rgba(91,155,240,0.4)] transition-all hover:scale-[1.02] active:scale-[0.98]"
           >
             <Plus className="h-4 w-4" />
             Add Task
@@ -129,8 +129,11 @@ export function TasksPage() {
       ) : view === 'calendar' ? (
         <TaskCalendarView tasks={tasks} onTaskClick={setSelectedTask} />
       ) : tasks.length === 0 ? (
-        <div className="flex flex-col items-center justify-center rounded-lg border border-dashed border-border py-16 text-center">
-          <p className="text-sm text-muted-foreground">
+        <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-border bg-card/50 py-16 text-center">
+          <div className="rounded-2xl bg-card-hover p-4 mb-4">
+            <Plus className="h-8 w-8 text-muted" />
+          </div>
+          <p className="text-sm font-medium text-muted-foreground">
             {view === 'myday' ? 'No tasks added to My Day' : 'No tasks found'}
           </p>
           <p className="mt-1 text-xs text-muted">
@@ -138,7 +141,7 @@ export function TasksPage() {
           </p>
           <button
             onClick={() => { setEditingTask(null); setDialogOpen(true); }}
-            className="mt-4 flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary-hover transition-colors"
+            className="mt-5 flex items-center gap-2 rounded-xl bg-gradient-to-r from-[#5B9BF0] to-[#3D6FBF] px-5 py-2 text-sm font-medium text-white shadow-[0_2px_12px_rgba(91,155,240,0.3)] hover:shadow-[0_4px_20px_rgba(91,155,240,0.4)] transition-all"
           >
             <Plus className="h-4 w-4" />
             {view === 'myday' ? 'Add to My Day' : 'Create Task'}
@@ -160,21 +163,21 @@ export function TasksPage() {
           </div>
 
           {meta && meta.totalPages > 1 && (
-            <div className="mt-6 flex items-center justify-center gap-2">
+            <div className="mt-6 flex items-center justify-center gap-3">
               <button
                 onClick={() => setPage((p) => Math.max(1, p - 1))}
                 disabled={page === 1}
-                className="rounded-md border border-border px-3 py-1.5 text-sm text-muted-foreground hover:text-foreground disabled:opacity-50 transition-colors"
+                className="rounded-lg border border-border bg-card px-4 py-1.5 text-sm font-medium text-muted-foreground hover:text-foreground hover:border-border-hover disabled:opacity-40 transition-all"
               >
                 Previous
               </button>
-              <span className="text-sm text-muted-foreground">
-                Page {page} of {meta.totalPages}
+              <span className="text-sm text-muted tabular-nums">
+                {page} / {meta.totalPages}
               </span>
               <button
                 onClick={() => setPage((p) => Math.min(meta.totalPages, p + 1))}
                 disabled={page === meta.totalPages}
-                className="rounded-md border border-border px-3 py-1.5 text-sm text-muted-foreground hover:text-foreground disabled:opacity-50 transition-colors"
+                className="rounded-lg border border-border bg-card px-4 py-1.5 text-sm font-medium text-muted-foreground hover:text-foreground hover:border-border-hover disabled:opacity-40 transition-all"
               >
                 Next
               </button>

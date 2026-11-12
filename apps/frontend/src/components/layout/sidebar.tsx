@@ -8,7 +8,9 @@ import {
   CreditCard,
   FolderKanban,
   Target,
+  BarChart3,
   BookOpen,
+  BookMarked,
   FileBox,
   Zap,
   Settings,
@@ -54,11 +56,15 @@ const navigation: NavGroup[] = [
   },
   {
     label: 'Growth',
-    items: [{ label: 'Goals & Habits', path: '/goals', icon: Target }],
+    items: [
+      { label: 'Goals & Habits', path: '/goals', icon: Target },
+      { label: 'Analytics', path: '/analytics', icon: BarChart3 },
+    ],
   },
   {
     label: 'Knowledge',
     items: [
+      { label: 'Reading', path: '/reading', icon: BookMarked },
       { label: 'Knowledge Base', path: '/knowledge', icon: BookOpen },
       { label: 'Documents', path: '/documents', icon: FileBox },
     ],
@@ -85,38 +91,48 @@ export function Sidebar() {
       )}
     >
       <div className="flex h-14 items-center gap-3 border-b border-border px-4">
-        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary text-sm font-bold text-primary-foreground">
-          L
-        </div>
-        {!collapsed && <span className="text-base font-semibold text-foreground">LifeOS</span>}
+        <img src="/Logo.png" alt="AVENLO" className="h-8 w-8 shrink-0 rounded-lg object-contain" />
+        {!collapsed && (
+          <span className="text-base font-semibold text-foreground tracking-tight">AVENLO</span>
+        )}
       </div>
 
       <nav className="flex-1 overflow-y-auto px-3 py-4">
         {navigation.map((group) => (
           <div key={group.label} className="mb-6">
             {!collapsed && (
-              <p className="mb-2 px-2 text-xs font-semibold uppercase tracking-wider text-muted animate-sidebar-label">
+              <p className="mb-2 px-2 text-[10px] font-semibold uppercase tracking-[0.15em] text-muted animate-sidebar-label">
                 {group.label}
               </p>
             )}
-            <ul className="space-y-1">
+            <ul className="space-y-0.5">
               {group.items.map((item) => (
                 <li key={item.path}>
                   <NavLink
                     to={item.path}
                     className={({ isActive }) =>
                       cn(
-                        'flex items-center gap-3 rounded-md px-2 py-2 text-sm font-medium transition-colors',
+                        'group relative flex items-center gap-3 rounded-lg px-2.5 py-2 text-sm font-medium transition-all duration-150',
                         isActive
-                          ? 'bg-sidebar-active text-sidebar-active-text'
+                          ? 'bg-[#5B9BF0]/10 text-[#5B9BF0]'
                           : 'text-muted-foreground hover:bg-card-hover hover:text-foreground',
-                        collapsed && 'justify-center',
+                        collapsed && 'justify-center px-0',
                       )
                     }
                     title={collapsed ? item.label : undefined}
                   >
-                    <item.icon className="h-4.5 w-4.5 shrink-0" />
-                    {!collapsed && <span>{item.label}</span>}
+                    {({ isActive }) => (
+                      <>
+                        {isActive && (
+                          <div className="absolute left-0 top-1/2 -translate-y-1/2 h-5 w-[3px] rounded-full bg-[#5B9BF0] shadow-[0_0_8px_rgba(91,155,240,0.5)]" />
+                        )}
+                        <item.icon className={cn(
+                          'h-[18px] w-[18px] shrink-0 transition-colors',
+                          isActive ? 'text-[#5B9BF0]' : 'text-muted group-hover:text-foreground',
+                        )} />
+                        {!collapsed && <span>{item.label}</span>}
+                      </>
+                    )}
                   </NavLink>
                 </li>
               ))}
@@ -125,11 +141,11 @@ export function Sidebar() {
         ))}
       </nav>
 
-      <div className="border-t border-border p-3 space-y-1">
+      <div className="border-t border-border p-3 space-y-0.5">
         <button
           onClick={() => { logout(); navigate('/login'); }}
           className={cn(
-            'flex w-full items-center gap-3 rounded-md p-2 text-muted-foreground transition-colors hover:bg-card-hover hover:text-foreground',
+            'flex w-full items-center gap-3 rounded-lg p-2 text-muted-foreground transition-all hover:bg-[#E05A52]/10 hover:text-[#E05A52]',
             collapsed && 'justify-center',
           )}
           title={collapsed ? 'Logout' : undefined}
@@ -139,7 +155,7 @@ export function Sidebar() {
         </button>
         <button
           onClick={toggle}
-          className="flex w-full items-center justify-center rounded-md p-2 text-muted-foreground transition-colors hover:bg-card-hover hover:text-foreground"
+          className="flex w-full items-center justify-center rounded-lg p-2 text-muted-foreground transition-colors hover:bg-card-hover hover:text-foreground"
         >
           {collapsed ? <PanelLeft className="h-4 w-4" /> : <PanelLeftClose className="h-4 w-4" />}
         </button>

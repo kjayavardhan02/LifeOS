@@ -18,6 +18,8 @@ import { documentRouter } from './modules/documents/index.js';
 import { quickCaptureRouter } from './modules/quick-capture/index.js';
 import { searchRouter } from './modules/search/index.js';
 import { goalRouter, habitRouter } from './modules/goals/index.js';
+import { analyticsRouter } from './modules/analytics/index.js';
+import { readingRouter } from './modules/reading/index.js';
 
 const app: Express = express();
 
@@ -49,6 +51,8 @@ app.use('/api/quick-capture', quickCaptureRouter);
 app.use('/api/search', searchRouter);
 app.use('/api/goals', goalRouter);
 app.use('/api/habits', habitRouter);
+app.use('/api/analytics', analyticsRouter);
+app.use('/api/reading', readingRouter);
 
 app.use(errorHandler);
 

@@ -113,7 +113,7 @@ export function ProjectDetailPage() {
         <p className="text-sm text-muted-foreground">Project not found</p>
         <button
           onClick={() => navigate('/projects')}
-          className="mt-4 flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary-hover transition-colors"
+          className="mt-4 flex items-center gap-2 rounded-xl bg-gradient-to-r from-[#5B9BF0] to-[#3D6FBF] px-5 py-2 text-sm font-medium text-white shadow-[0_2px_12px_rgba(91,155,240,0.3)] hover:shadow-[0_4px_20px_rgba(91,155,240,0.4)] transition-all"
         >
           <ArrowLeft className="h-4 w-4" />
           Back to Projects
@@ -245,7 +245,7 @@ export function ProjectDetailPage() {
               className="h-4 w-4 rounded-sm shrink-0"
               style={{ backgroundColor: project.color }}
             />
-            <h1 className="text-xl font-semibold text-foreground">{project.name}</h1>
+            <h1 className="text-2xl font-bold text-foreground tracking-tight">{project.name}</h1>
             <span className={cn('rounded px-2 py-0.5 text-xs font-medium', status.color)}>
               {status.text}
             </span>
