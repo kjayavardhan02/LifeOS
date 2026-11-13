@@ -61,8 +61,14 @@ export function FinancePage() {
   const { data: summaryResponse, isLoading: summaryLoading } = useFinanceSummary(month, year);
   const summary = summaryResponse?.data;
 
+  const dateFrom = `${year}-${String(month).padStart(2, '0')}-01`;
+  const lastDay = new Date(year, month, 0).getDate();
+  const dateTo = `${year}-${String(month).padStart(2, '0')}-${String(lastDay).padStart(2, '0')}T23:59:59.999Z`;
+
   const { data: txData, isLoading: txLoading } = useTransactions({
     ...filters,
+    dateFrom,
+    dateTo,
     page,
     limit: 20,
     sortBy: 'date',
@@ -121,6 +127,7 @@ export function FinancePage() {
   };
 
   const prevMonth = () => {
+    setPage(1);
     if (month === 1) {
       setMonth(12);
       setYear(year - 1);
@@ -130,6 +137,7 @@ export function FinancePage() {
   };
 
   const nextMonth = () => {
+    setPage(1);
     if (month === 12) {
       setMonth(1);
       setYear(year + 1);
