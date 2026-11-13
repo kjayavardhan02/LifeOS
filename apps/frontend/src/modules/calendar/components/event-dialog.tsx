@@ -159,37 +159,100 @@ export function EventDialog({ open, onClose, onSubmit, event, defaultDate }: Eve
                 </label>
               </div>
 
-              <div className="grid grid-cols-2 gap-2">
-                <div>
-                  <label className={labelClass}>Start *</label>
-                  <input
-                    type={isAllDay ? 'date' : 'datetime-local'}
-                    value={isAllDay ? startDate.slice(0, 10) : startDate}
-                    onChange={(e) => {
-                      const val = isAllDay ? e.target.value + 'T00:00' : e.target.value;
-                      setStartDate(val);
-                      if (new Date(val) >= new Date(endDate)) {
-                        setEndDate(getDefaultEnd(val));
-                      }
-                    }}
-                    className={inputClass}
-                    required
-                  />
+              {isAllDay ? (
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <label className={labelClass}>Start Date *</label>
+                    <input
+                      type="date"
+                      value={startDate.slice(0, 10)}
+                      onChange={(e) => {
+                        const val = e.target.value + 'T00:00';
+                        setStartDate(val);
+                        if (new Date(val) >= new Date(endDate)) {
+                          setEndDate(getDefaultEnd(val));
+                        }
+                      }}
+                      className={inputClass}
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className={labelClass}>End Date *</label>
+                    <input
+                      type="date"
+                      value={endDate.slice(0, 10)}
+                      onChange={(e) => {
+                        const val = e.target.value + 'T23:59';
+                        setEndDate(val);
+                      }}
+                      className={inputClass}
+                      required
+                    />
+                  </div>
                 </div>
-                <div>
-                  <label className={labelClass}>End *</label>
-                  <input
-                    type={isAllDay ? 'date' : 'datetime-local'}
-                    value={isAllDay ? endDate.slice(0, 10) : endDate}
-                    onChange={(e) => {
-                      const val = isAllDay ? e.target.value + 'T23:59' : e.target.value;
-                      setEndDate(val);
-                    }}
-                    className={inputClass}
-                    required
-                  />
+              ) : (
+                <div className="grid grid-cols-4 gap-2">
+                  <div>
+                    <label className={labelClass}>Start Date *</label>
+                    <input
+                      type="date"
+                      value={startDate.slice(0, 10)}
+                      onChange={(e) => {
+                        const val = e.target.value + 'T' + (startDate.slice(11, 16) || '00:00');
+                        setStartDate(val);
+                        if (new Date(val) >= new Date(endDate)) {
+                          setEndDate(getDefaultEnd(val));
+                        }
+                      }}
+                      className={inputClass}
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className={labelClass}>Start Time *</label>
+                    <input
+                      type="time"
+                      value={startDate.slice(11, 16)}
+                      onChange={(e) => {
+                        const val = startDate.slice(0, 10) + 'T' + e.target.value;
+                        setStartDate(val);
+                        if (new Date(val) >= new Date(endDate)) {
+                          setEndDate(getDefaultEnd(val));
+                        }
+                      }}
+                      className={inputClass}
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className={labelClass}>End Date *</label>
+                    <input
+                      type="date"
+                      value={endDate.slice(0, 10)}
+                      onChange={(e) => {
+                        const val = e.target.value + 'T' + (endDate.slice(11, 16) || '00:00');
+                        setEndDate(val);
+                      }}
+                      className={inputClass}
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className={labelClass}>End Time *</label>
+                    <input
+                      type="time"
+                      value={endDate.slice(11, 16)}
+                      onChange={(e) => {
+                        const val = endDate.slice(0, 10) + 'T' + e.target.value;
+                        setEndDate(val);
+                      }}
+                      className={inputClass}
+                      required
+                    />
+                  </div>
                 </div>
-              </div>
+              )}
 
               <div className="grid grid-cols-3 gap-2">
                 <div>

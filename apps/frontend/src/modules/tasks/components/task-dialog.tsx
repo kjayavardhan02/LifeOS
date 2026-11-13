@@ -215,13 +215,22 @@ export function TaskDialog({ open, onClose, onSubmit, task }: TaskDialogProps) {
                 </div>
               </div>
 
-              <div className="grid grid-cols-3 gap-2">
+              <div className="grid grid-cols-4 gap-2">
                 <div>
                   <label className={labelClass}>Due Date</label>
                   <input
-                    type="datetime-local"
-                    value={dueDate}
-                    onChange={(e) => setDueDate(e.target.value)}
+                    type="date"
+                    value={dueDate.slice(0, 10)}
+                    onChange={(e) => setDueDate(e.target.value ? e.target.value + 'T' + (dueDate.slice(11, 16) || '09:00') : '')}
+                    className={inputClass}
+                  />
+                </div>
+                <div>
+                  <label className={labelClass}>Due Time</label>
+                  <input
+                    type="time"
+                    value={dueDate.slice(11, 16)}
+                    onChange={(e) => setDueDate((dueDate.slice(0, 10) || new Date().toISOString().slice(0, 10)) + 'T' + e.target.value)}
                     className={inputClass}
                   />
                 </div>
@@ -301,9 +310,9 @@ export function TaskDialog({ open, onClose, onSubmit, task }: TaskDialogProps) {
                       <div>
                         <label className={labelClass}>End Date</label>
                         <input
-                          type="datetime-local"
-                          value={recurrenceEndDate}
-                          onChange={(e) => setRecurrenceEndDate(e.target.value)}
+                          type="date"
+                          value={recurrenceEndDate.slice(0, 10)}
+                          onChange={(e) => setRecurrenceEndDate(e.target.value ? e.target.value + 'T23:59' : '')}
                           className={inputClass}
                         />
                       </div>

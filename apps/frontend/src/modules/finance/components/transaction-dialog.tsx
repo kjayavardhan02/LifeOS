@@ -154,7 +154,7 @@ export function TransactionDialog({
                 ))}
               </div>
 
-              <div className="grid grid-cols-3 gap-2">
+              <div className="grid grid-cols-4 gap-2">
                 <div>
                   <label className={labelClass}>Amount *</label>
                   <div className="relative">
@@ -175,7 +175,11 @@ export function TransactionDialog({
                 </div>
                 <div>
                   <label className={labelClass}>Date *</label>
-                  <input type="datetime-local" value={date} onChange={(e) => setDate(e.target.value)} className={inputClass} required />
+                  <input type="date" value={date.slice(0, 10)} onChange={(e) => setDate(e.target.value + 'T' + (date.slice(11, 16) || '00:00'))} className={inputClass} required />
+                </div>
+                <div>
+                  <label className={labelClass}>Time *</label>
+                  <input type="time" value={date.slice(11, 16)} onChange={(e) => setDate(date.slice(0, 10) + 'T' + e.target.value)} className={inputClass} required />
                 </div>
                 <div>
                   <label className={labelClass}>Payment</label>
