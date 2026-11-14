@@ -10,6 +10,9 @@ import {
   CheckCircle2,
   ChevronRight,
   AlertTriangle,
+  CreditCard,
+  Target,
+  FileBox,
 } from 'lucide-react';
 import { StatCard } from '@/components/shared/stat-card';
 import { useAuthStore } from '@/stores/auth-store';
@@ -17,9 +20,10 @@ import { useTasks } from '@/modules/tasks/hooks/use-tasks';
 import { useUpcomingEvents } from '@/modules/calendar/hooks/use-events';
 import { useActiveReminders } from '@/modules/reminders/hooks/use-reminders';
 import { useFinanceSummary, useRecentTransactions } from '@/modules/finance/hooks/use-transactions';
+import { useLifeContext } from '@/hooks/use-life-context';
 import { cn } from '@/lib/utils';
-import { format, isPast, isToday } from 'date-fns';
-import type { Task, CalendarEvent, Reminder, FinanceTransaction } from '@lifeos/shared';
+import { format, isPast, isToday, differenceInCalendarDays } from 'date-fns';
+import type { Task, CalendarEvent, Reminder, FinanceTransaction, LifeContextSnapshot } from '@lifeos/shared';
 
 function getGreeting(): string {
   const hour = new Date().getHours();
@@ -48,6 +52,12 @@ export function DashboardPage() {
   const now = new Date();
   const { data: summaryData } = useFinanceSummary(now.getMonth() + 1, now.getFullYear());
   const { data: recentTxData } = useRecentTransactions(5);
+  const { data: lifeContextData } = useLifeContext();
+
+  const snapshot = lifeContextData?.data;
+  const upcomingRenewals = snapshot?.upcomingRenewals ?? [];
+  const activeGoals = snapshot?.activeGoals ?? [];
+  const expiringDocuments = snapshot?.expiringDocuments ?? [];
 
   const openTasks = openData?.data ?? [];
   const myDayTasks = myDayData?.data ?? [];
@@ -66,14 +76,19 @@ export function DashboardPage() {
 
   return (
     <div>
-      <div className="mb-8 animate-page-in">
-        <div className="flex items-center gap-3">
-          <span className="text-2xl">{getGreetingEmoji()}</span>
+      <div className="relative mb-10 animate-page-in overflow-hidden rounded-2xl border border-border/50 bg-card p-8 card-shine">
+        <div className="absolute inset-0 bg-gradient-to-br from-[#5B9BF0]/8 via-transparent to-[#E89B6E]/5 pointer-events-none" />
+        <div className="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-primary/5 blur-[80px] pointer-events-none" />
+        <div className="absolute -left-10 -bottom-10 h-40 w-40 rounded-full bg-info/5 blur-[60px] pointer-events-none" />
+        <div className="relative flex items-center gap-4">
+          <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-[#5B9BF0]/20 to-[#5B9BF0]/5 ring-1 ring-white/5 text-3xl">
+            {getGreetingEmoji()}
+          </div>
           <div>
-            <h1 className="text-2xl font-bold text-foreground tracking-tight">
+            <h1 className="text-3xl font-bold text-foreground tracking-tight">
               {getGreeting()}, <span className="gradient-text-primary">{firstName}</span>
             </h1>
-            <p className="mt-1 text-sm text-muted">
+            <p className="mt-1 text-sm text-muted-foreground">
               {format(new Date(), 'EEEE, MMMM d')} — Your life at a glance
             </p>
           </div>
@@ -185,6 +200,59 @@ export function DashboardPage() {
           </div>
         </DashboardSection>
       </div>
+
+      <div className="mt-6 grid gap-6 lg:grid-cols-3">
+        <DashboardSection
+          title="Upcoming Renewals"
+          subtitle="Next 7 days"
+          onViewAll={() => navigate('/subscriptions')}
+          emptyIcon={<CreditCard className="h-10 w-10 text-muted" />}
+          emptyTitle="No renewals this week"
+          emptySubtitle="Subscription renewals will appear here"
+          isEmpty={upcomingRenewals.length === 0}
+          index={4}
+        >
+          <div className="space-y-1">
+            {upcomingRenewals.slice(0, 5).map((renewal) => (
+              <DashboardRenewalItem key={renewal.id} renewal={renewal} onClick={() => navigate('/subscriptions')} />
+            ))}
+          </div>
+        </DashboardSection>
+
+        <DashboardSection
+          title="Active Goals"
+          subtitle="In progress"
+          onViewAll={() => navigate('/goals')}
+          emptyIcon={<Target className="h-10 w-10 text-muted" />}
+          emptyTitle="No active goals"
+          emptySubtitle="Goals you're working on will show up here"
+          isEmpty={activeGoals.length === 0}
+          index={5}
+        >
+          <div className="space-y-1">
+            {activeGoals.slice(0, 5).map((goal) => (
+              <DashboardGoalItem key={goal.id} goal={goal} onClick={() => navigate('/goals')} />
+            ))}
+          </div>
+        </DashboardSection>
+
+        <DashboardSection
+          title="Expiring Documents"
+          subtitle="Next 7 days"
+          onViewAll={() => navigate('/documents')}
+          emptyIcon={<FileBox className="h-10 w-10 text-muted" />}
+          emptyTitle="No documents expiring soon"
+          emptySubtitle="Documents nearing expiry will show up here"
+          isEmpty={expiringDocuments.length === 0}
+          index={6}
+        >
+          <div className="space-y-1">
+            {expiringDocuments.slice(0, 5).map((doc) => (
+              <DashboardDocumentItem key={doc.id} doc={doc} onClick={() => navigate('/documents')} />
+            ))}
+          </div>
+        </DashboardSection>
+      </div>
     </div>
   );
 }
@@ -212,26 +280,28 @@ function DashboardSection({
 }) {
   return (
     <div
-      className="group rounded-xl border border-border bg-card overflow-hidden card-interactive animate-card-in"
+      className="group rounded-2xl border border-border/60 bg-card overflow-hidden card-interactive card-shine animate-card-in"
       style={{ '--i': index } as React.CSSProperties}
     >
-      <div className="flex items-center justify-between px-5 pt-5 pb-3">
+      <div className="flex items-center justify-between px-6 pt-6 pb-3">
         <div>
-          <h2 className="text-base font-semibold text-foreground">{title}</h2>
+          <h2 className="text-base font-semibold text-foreground tracking-tight">{title}</h2>
           <p className="mt-0.5 text-xs text-muted">{subtitle}</p>
         </div>
         <button
           onClick={onViewAll}
-          className="flex items-center gap-1 rounded-lg px-2.5 py-1 text-xs font-medium text-primary hover:bg-[#5B9BF0]/10 transition-colors"
+          className="flex items-center gap-1 rounded-lg border border-border/50 px-3 py-1.5 text-xs font-medium text-muted-foreground hover:text-primary hover:border-primary/30 hover:bg-[#5B9BF0]/5 transition-all"
         >
           View all <ChevronRight className="h-3 w-3" />
         </button>
       </div>
-      <div className="px-5 pb-5">
+      <div className="px-6 pb-6">
         {isEmpty ? (
-          <div className="flex flex-col items-center justify-center py-8 text-center">
-            {emptyIcon}
-            <p className="mt-3 text-sm text-muted-foreground">{emptyTitle}</p>
+          <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-border/50 bg-background/30 py-10 text-center">
+            <div className="rounded-2xl bg-card-hover p-4">
+              {emptyIcon}
+            </div>
+            <p className="mt-4 text-sm font-medium text-muted-foreground">{emptyTitle}</p>
             <p className="mt-1 text-xs text-muted">{emptySubtitle}</p>
           </div>
         ) : (
@@ -362,6 +432,75 @@ function DashboardEventItem({ event, onClick }: { event: CalendarEvent; onClick:
         style={{ backgroundColor: event.color + '18', color: event.color }}
       >
         {event.category}
+      </span>
+    </button>
+  );
+}
+
+function DashboardRenewalItem({ renewal, onClick }: { renewal: LifeContextSnapshot['upcomingRenewals'][number]; onClick: () => void }) {
+  return (
+    <button
+      onClick={onClick}
+      className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left transition-all hover:bg-card-hover"
+    >
+      <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-[#E05A52]/10">
+        <CreditCard className="h-3.5 w-3.5 text-[#E05A52]" />
+      </div>
+      <span className="flex-1 truncate text-sm text-foreground">{renewal.name}</span>
+      <span className="text-xs shrink-0 text-muted">
+        {format(new Date(renewal.nextRenewalDate), 'MMM d')}
+      </span>
+      <span className="text-sm font-semibold shrink-0 tabular-nums text-foreground">
+        ₹{renewal.amount.toLocaleString('en-IN')}
+        <span className="ml-0.5 text-xs font-normal text-muted">
+          /{renewal.billingCycle === 'monthly' ? 'mo' : renewal.billingCycle === 'yearly' ? 'yr' : renewal.billingCycle}
+        </span>
+      </span>
+    </button>
+  );
+}
+
+function DashboardGoalItem({ goal, onClick }: { goal: LifeContextSnapshot['activeGoals'][number]; onClick: () => void }) {
+  const progressColor = goal.progress >= 100 ? 'bg-success' : goal.progress > 50 ? 'bg-primary' : 'bg-warning';
+
+  return (
+    <button
+      onClick={onClick}
+      className="flex w-full flex-col gap-1.5 rounded-lg px-3 py-2.5 text-left transition-all hover:bg-card-hover"
+    >
+      <div className="flex w-full items-center gap-3">
+        <Target className="h-4 w-4 shrink-0 text-muted-foreground" />
+        <span className="flex-1 truncate text-sm text-foreground">{goal.title}</span>
+        <span className="text-xs shrink-0 font-medium text-muted-foreground">{goal.progress}%</span>
+      </div>
+      <div className="h-1.5 w-full rounded-full bg-border">
+        <div
+          className={cn('h-full rounded-full transition-all', progressColor)}
+          style={{ width: `${Math.min(goal.progress, 100)}%` }}
+        />
+      </div>
+    </button>
+  );
+}
+
+function DashboardDocumentItem({ doc, onClick }: { doc: LifeContextSnapshot['expiringDocuments'][number]; onClick: () => void }) {
+  const daysUntilExpiry = differenceInCalendarDays(new Date(doc.expiryDate), new Date());
+  const isUrgent = daysUntilExpiry <= 3;
+
+  return (
+    <button
+      onClick={onClick}
+      className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left transition-all hover:bg-card-hover"
+    >
+      <FileBox className={cn('h-4 w-4 shrink-0', isUrgent ? 'text-danger' : 'text-muted-foreground')} />
+      <span className="flex-1 truncate text-sm text-foreground">{doc.name}</span>
+      <span
+        className="rounded-md px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wider bg-card-hover text-muted"
+      >
+        {doc.category}
+      </span>
+      <span className={cn('text-xs shrink-0', isUrgent ? 'text-danger' : 'text-muted')}>
+        {format(new Date(doc.expiryDate), 'MMM d')}
       </span>
     </button>
   );

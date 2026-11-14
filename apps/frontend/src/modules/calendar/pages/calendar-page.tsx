@@ -22,14 +22,16 @@ import {
   endOfWeek,
 } from 'date-fns';
 import { cn } from '@/lib/utils';
-import { useEvents, useCreateEvent, useUpdateEvent } from '../hooks/use-events';
+import { useEvents, useCreateEvent, useUpdateEvent, useCalendarFeed } from '../hooks/use-events';
 import { MonthView } from '../components/month-view';
 import { WeekView } from '../components/week-view';
 import { DayView } from '../components/day-view';
 import { AgendaView } from '../components/agenda-view';
 import { EventDialog } from '../components/event-dialog';
 import { EventDetailPanel } from '../components/event-detail-panel';
-import type { CalendarEvent, CreateEventInput, UpdateEventInput } from '@lifeos/shared';
+import { CalendarLegend } from '../components/calendar-legend';
+import { FeedItemPopover } from '../components/feed-item-popover';
+import type { CalendarEvent, CalendarFeedItem, CreateEventInput, UpdateEventInput } from '@lifeos/shared';
 
 type ViewMode = 'month' | 'week' | 'day' | 'agenda';
 
@@ -75,14 +77,19 @@ export function CalendarPage() {
   const [editingEvent, setEditingEvent] = useState<CalendarEvent | null>(null);
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
   const [defaultDate, setDefaultDate] = useState<Date | undefined>(undefined);
+  const [selectedFeedItem, setSelectedFeedItem] = useState<CalendarFeedItem | null>(null);
 
   const dateRange = getDateRange(view, currentDate);
   const { data, isLoading } = useEvents({ ...dateRange, limit: 100 });
+  const { data: feedData } = useCalendarFeed(dateRange.startFrom, dateRange.startTo);
   const createEvent = useCreateEvent();
   const updateEvent = useUpdateEvent();
 
 
   const events = data?.data ?? [];
+  // The feed endpoint returns native events too (merged feed); exclude them here since
+  // useEvents() above already supplies those as fully editable CalendarEvent objects.
+  const feedItems = (feedData?.data ?? []).filter((item) => item.source !== 'event');
 
   const navigatePrev = () => {
     switch (view) {
@@ -131,6 +138,10 @@ export function CalendarPage() {
     setDefaultDate(date);
     setEditingEvent(null);
     setDialogOpen(true);
+  };
+
+  const handleFeedItemClick = (item: CalendarFeedItem) => {
+    setSelectedFeedItem(item);
   };
 
   return (
@@ -194,6 +205,8 @@ export function CalendarPage() {
         </div>
       </div>
 
+      <CalendarLegend />
+
       {isLoading ? (
         <div className="space-y-3">
           {[...Array(5)].map((_, i) => (
@@ -204,28 +217,36 @@ export function CalendarPage() {
         <MonthView
           currentDate={currentDate}
           events={events}
+          feedItems={feedItems}
           onEventClick={handleEventClick}
           onDayClick={handleDayClick}
+          onFeedItemClick={handleFeedItemClick}
         />
       ) : view === 'week' ? (
         <WeekView
           currentDate={currentDate}
           events={events}
+          feedItems={feedItems}
           onEventClick={handleEventClick}
           onSlotClick={handleDayClick}
+          onFeedItemClick={handleFeedItemClick}
         />
       ) : view === 'day' ? (
         <DayView
           currentDate={currentDate}
           events={events}
+          feedItems={feedItems}
           onEventClick={handleEventClick}
           onSlotClick={handleDayClick}
+          onFeedItemClick={handleFeedItemClick}
         />
       ) : (
         <AgendaView
           currentDate={currentDate}
           events={events}
+          feedItems={feedItems}
           onEventClick={handleEventClick}
+          onFeedItemClick={handleFeedItemClick}
         />
       )}
 
@@ -240,6 +261,11 @@ export function CalendarPage() {
       <EventDetailPanel
         event={selectedEvent}
         onClose={() => setSelectedEvent(null)}
+      />
+
+      <FeedItemPopover
+        item={selectedFeedItem}
+        onClose={() => setSelectedFeedItem(null)}
       />
     </div>
   );

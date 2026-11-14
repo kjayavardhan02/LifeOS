@@ -46,23 +46,28 @@ export function SignupPage() {
         </div>
 
         <div className="relative z-10 flex flex-1 flex-col justify-center px-16">
-          <div className="mb-3 flex items-center gap-3">
-            <img src="/Logo.png" alt="AVENLO" className="h-11 w-11 rounded-xl object-contain" />
-            <span className="text-2xl font-bold text-foreground tracking-tight">AVENLO</span>
+          <div className="mb-4 flex items-center gap-4">
+            <img src="/logo1.png" alt="AVENLO" className="h-14 w-14 rounded-2xl object-contain ring-1 ring-white/10 shadow-lg shadow-primary/20" />
+            <div>
+              <span className="text-3xl font-bold text-foreground tracking-tight">AVENLO</span>
+              <p className="text-sm text-muted-foreground mt-0.5">Your Life. In Sync.</p>
+            </div>
           </div>
-          <p className="mb-10 max-w-md text-lg text-muted-foreground">
-            Your Life. In Sync.
+          <p className="mb-10 max-w-md text-base text-muted-foreground/80 leading-relaxed">
+            A centralized personal management platform. Productivity, finance, knowledge — everything in one place.
           </p>
 
           <div className="grid grid-cols-2 gap-3">
             {features.map(({ icon: Icon, label }, i) => (
               <div
                 key={label}
-                className="flex items-center gap-2.5 rounded-lg border border-border/60 bg-card/50 px-3.5 py-2.5 backdrop-blur-sm animate-card-in"
+                className="flex items-center gap-2.5 rounded-xl border border-border/40 bg-card/30 px-4 py-3 backdrop-blur-sm animate-card-in transition-all hover:border-primary/20 hover:bg-card/50"
                 style={{ '--i': i } as React.CSSProperties}
               >
-                <Icon className="h-4 w-4 shrink-0 text-primary" />
-                <span className="text-sm text-muted-foreground">{label}</span>
+                <div className="rounded-lg bg-primary/10 p-1.5">
+                  <Icon className="h-3.5 w-3.5 shrink-0 text-primary" />
+                </div>
+                <span className="text-sm font-medium text-muted-foreground">{label}</span>
               </div>
             ))}
           </div>
@@ -77,9 +82,9 @@ export function SignupPage() {
       <div className="flex w-full items-center justify-center px-6 lg:w-1/2">
         <div className="w-full max-w-sm animate-page-in">
           {/* Mobile-only logo */}
-          <div className="mb-8 flex items-center justify-center gap-2.5 lg:hidden">
-            <img src="/Logo.png" alt="AVENLO" className="h-10 w-10 rounded-xl object-contain" />
-            <span className="text-xl font-bold text-foreground">AVENLO</span>
+          <div className="mb-8 flex flex-col items-center gap-3 lg:hidden">
+            <img src="/logo1.png" alt="AVENLO" className="h-12 w-12 rounded-2xl object-contain ring-1 ring-white/10 shadow-lg shadow-primary/20" />
+            <span className="text-xl font-bold text-foreground tracking-tight">AVENLO</span>
           </div>
 
           <div className="mb-8">

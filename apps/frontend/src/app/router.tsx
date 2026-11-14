@@ -16,6 +16,7 @@ import { QuickCapturePage } from '@/modules/quick-capture';
 import { GoalsHabitsPage, GoalDetailPage } from '@/modules/goals';
 import { AnalyticsPage } from '@/modules/analytics';
 import { ReadingPage } from '@/modules/reading';
+import { AutomationPage } from '@/modules/automation';
 
 export const router = createBrowserRouter([
   {
@@ -52,6 +53,7 @@ export const router = createBrowserRouter([
           { path: '/documents', element: <DocumentsPage /> },
           { path: '/capture', element: <QuickCapturePage /> },
           { path: '/profile', element: <ProfilePage /> },
+          { path: '/automation', element: <AutomationPage /> },
           { path: '/settings', element: <SettingsPage /> },
         ],
       },

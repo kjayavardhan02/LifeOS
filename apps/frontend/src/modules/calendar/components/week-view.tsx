@@ -1,14 +1,17 @@
 import { startOfWeek, addDays, format, isSameDay, isToday } from 'date-fns';
 import { cn } from '@/lib/utils';
-import type { CalendarEvent } from '@lifeos/shared';
+import type { CalendarEvent, CalendarFeedItem } from '@lifeos/shared';
+import { FEED_SOURCE_ICON } from './feed-item-badge';
 
 const HOURS = Array.from({ length: 24 }, (_, i) => i);
 
 interface WeekViewProps {
   currentDate: Date;
   events: CalendarEvent[];
+  feedItems?: CalendarFeedItem[];
   onEventClick: (event: CalendarEvent) => void;
   onSlotClick: (date: Date) => void;
+  onFeedItemClick?: (item: CalendarFeedItem) => void;
 }
 
 interface LayoutColumn {
@@ -95,12 +98,14 @@ function layoutEvents(events: CalendarEvent[]): LayoutColumn[] {
   return result;
 }
 
-export function WeekView({ currentDate, events, onEventClick, onSlotClick }: WeekViewProps) {
+export function WeekView({ currentDate, events, feedItems = [], onEventClick, onSlotClick, onFeedItemClick }: WeekViewProps) {
   const weekStart = startOfWeek(currentDate, { weekStartsOn: 1 });
   const days = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i));
 
   const allDayEvents = events.filter((e) => e.isAllDay);
   const timedEvents = events.filter((e) => !e.isAllDay);
+  const allDayFeedItems = feedItems.filter((i) => i.isAllDay);
+  const timedFeedItems = feedItems.filter((i) => !i.isAllDay);
 
   return (
     <div className="rounded-lg border border-border bg-card overflow-hidden">
@@ -123,15 +128,16 @@ export function WeekView({ currentDate, events, onEventClick, onSlotClick }: Wee
       </div>
 
       {/* All-day events row */}
-      {allDayEvents.length > 0 && (
+      {(allDayEvents.length > 0 || allDayFeedItems.length > 0) && (
         <div className="grid grid-cols-[60px_repeat(7,1fr)] border-b border-border">
           <div className="border-r border-border px-1 py-1 text-xs text-muted flex items-center justify-center">
             All day
           </div>
           {days.map((day) => {
             const dayAllDay = allDayEvents.filter((e) => isSameDay(new Date(e.startDate), day));
+            const dayAllDayFeed = allDayFeedItems.filter((i) => isSameDay(new Date(i.startDate), day));
             return (
-              <div key={day.toISOString()} className="border-r border-border last:border-r-0 p-1 min-h-[32px]">
+              <div key={day.toISOString()} className="border-r border-border last:border-r-0 p-1 min-h-[32px] space-y-0.5">
                 {dayAllDay.map((event) => (
                   <button
                     key={event.id}
@@ -142,6 +148,20 @@ export function WeekView({ currentDate, events, onEventClick, onSlotClick }: Wee
                     {event.title}
                   </button>
                 ))}
+                {dayAllDayFeed.map((item) => {
+                  const Icon = FEED_SOURCE_ICON[item.source];
+                  return (
+                    <button
+                      key={item.id}
+                      onClick={() => onFeedItemClick?.(item)}
+                      className="flex w-full items-center gap-1 truncate rounded border border-dashed px-1.5 py-0.5 text-xs hover:opacity-80"
+                      style={{ backgroundColor: item.color + '15', color: item.color, borderColor: item.color + '50' }}
+                    >
+                      <Icon className="h-3 w-3 shrink-0" />
+                      <span className="truncate">{item.title}</span>
+                    </button>
+                  );
+                })}
               </div>
             );
           })}
@@ -162,6 +182,7 @@ export function WeekView({ currentDate, events, onEventClick, onSlotClick }: Wee
         {days.map((day) => {
           const dayTimedEvents = timedEvents.filter((e) => isSameDay(new Date(e.startDate), day));
           const laid = layoutEvents(dayTimedEvents);
+          const dayTimedFeedItems = timedFeedItems.filter((i) => isSameDay(new Date(i.startDate), day));
           return (
             <div key={day.toISOString()} className={cn('relative border-r border-border last:border-r-0', isToday(day) && 'bg-primary/3')}>
               {HOURS.map((hour) => (
@@ -197,6 +218,27 @@ export function WeekView({ currentDate, events, onEventClick, onSlotClick }: Wee
                     <div className="text-[10px] opacity-80">
                       {format(new Date(item.event.startDate), 'h:mm a')}
                     </div>
+                  </button>
+                );
+              })}
+              {dayTimedFeedItems.map((feedItem) => {
+                const start = new Date(feedItem.startDate);
+                const startMin = start.getHours() * 60 + start.getMinutes();
+                const Icon = FEED_SOURCE_ICON[feedItem.source];
+                return (
+                  <button
+                    key={feedItem.id}
+                    onClick={() => onFeedItemClick?.(feedItem)}
+                    title={feedItem.title}
+                    className="absolute right-0.5 z-10 flex h-4 w-4 shrink-0 items-center justify-center rounded-full border border-dashed shadow-sm hover:scale-110 transition-transform"
+                    style={{
+                      top: (startMin / 60) * 48 - 2,
+                      backgroundColor: feedItem.color + '30',
+                      color: feedItem.color,
+                      borderColor: feedItem.color,
+                    }}
+                  >
+                    <Icon className="h-2.5 w-2.5" />
                   </button>
                 );
               })}

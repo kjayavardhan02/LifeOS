@@ -1,15 +1,18 @@
 import { format, isSameDay, isToday, isTomorrow, addDays } from 'date-fns';
 import { MapPin, Clock, Repeat } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import type { CalendarEvent } from '@lifeos/shared';
+import type { CalendarEvent, CalendarFeedItem } from '@lifeos/shared';
+import { FEED_SOURCE_ICON } from './feed-item-badge';
 
 interface AgendaViewProps {
   currentDate: Date;
   events: CalendarEvent[];
+  feedItems?: CalendarFeedItem[];
   onEventClick: (event: CalendarEvent) => void;
+  onFeedItemClick?: (item: CalendarFeedItem) => void;
 }
 
-export function AgendaView({ currentDate, events, onEventClick }: AgendaViewProps) {
+export function AgendaView({ currentDate, events, feedItems = [], onEventClick, onFeedItemClick }: AgendaViewProps) {
   const sortedEvents = [...events].sort(
     (a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime()
   );
@@ -22,7 +25,17 @@ export function AgendaView({ currentDate, events, onEventClick }: AgendaViewProp
     grouped.set(key, existing);
   }
 
-  if (sortedEvents.length === 0) {
+  const feedGrouped = new Map<string, CalendarFeedItem[]>();
+  for (const item of feedItems) {
+    const key = format(new Date(item.startDate), 'yyyy-MM-dd');
+    const existing = feedGrouped.get(key) ?? [];
+    existing.push(item);
+    feedGrouped.set(key, existing);
+  }
+
+  const allDateKeys = Array.from(new Set([...grouped.keys(), ...feedGrouped.keys()])).sort();
+
+  if (sortedEvents.length === 0 && feedItems.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center rounded-lg border border-dashed border-border py-16 text-center">
         <Clock className="h-10 w-10 text-muted" />
@@ -34,7 +47,9 @@ export function AgendaView({ currentDate, events, onEventClick }: AgendaViewProp
 
   return (
     <div className="space-y-4">
-      {Array.from(grouped.entries()).map(([dateKey, dayEvents]) => {
+      {allDateKeys.map((dateKey) => {
+        const dayEvents = grouped.get(dateKey) ?? [];
+        const dayFeedItems = feedGrouped.get(dateKey) ?? [];
         const date = new Date(dateKey + 'T12:00:00');
         const today = isToday(date);
         const tomorrow = isTomorrow(date);
@@ -85,6 +100,32 @@ export function AgendaView({ currentDate, events, onEventClick }: AgendaViewProp
                   </div>
                 </button>
               ))}
+              {dayFeedItems.map((item) => {
+                const Icon = FEED_SOURCE_ICON[item.source];
+                return (
+                  <button
+                    key={item.id}
+                    onClick={() => onFeedItemClick?.(item)}
+                    className="flex w-full items-start gap-3 rounded-lg border border-dashed bg-card p-3 text-left transition-colors hover:bg-card-hover"
+                    style={{ borderColor: item.color + '50' }}
+                  >
+                    <Icon className="mt-0.5 h-3.5 w-3.5 shrink-0" style={{ color: item.color }} />
+                    <div className="min-w-0 flex-1">
+                      <span className="font-medium text-sm text-foreground truncate">{item.title}</span>
+                      <div className="mt-0.5 flex items-center gap-3 text-xs text-muted-foreground">
+                        {item.isAllDay ? (
+                          <span>All day</span>
+                        ) : (
+                          <span>{format(new Date(item.startDate), 'h:mm a')}</span>
+                        )}
+                        <span className="rounded px-1.5 py-0.5 text-xs" style={{ backgroundColor: item.color + '15', color: item.color }}>
+                          Read-only
+                        </span>
+                      </div>
+                    </div>
+                  </button>
+                );
+              })}
             </div>
           </div>
         );

@@ -1,6 +1,7 @@
 import { format, isSameDay, isToday } from 'date-fns';
 import { cn } from '@/lib/utils';
-import type { CalendarEvent } from '@lifeos/shared';
+import type { CalendarEvent, CalendarFeedItem } from '@lifeos/shared';
+import { FEED_SOURCE_ICON } from './feed-item-badge';
 
 const HOURS = Array.from({ length: 24 }, (_, i) => i);
 const SLOT_HEIGHT = 60;
@@ -8,8 +9,10 @@ const SLOT_HEIGHT = 60;
 interface DayViewProps {
   currentDate: Date;
   events: CalendarEvent[];
+  feedItems?: CalendarFeedItem[];
   onEventClick: (event: CalendarEvent) => void;
   onSlotClick: (date: Date) => void;
+  onFeedItemClick?: (item: CalendarFeedItem) => void;
 }
 
 interface LayoutColumn {
@@ -95,12 +98,16 @@ function layoutEvents(events: CalendarEvent[]): LayoutColumn[] {
   return result;
 }
 
-export function DayView({ currentDate, events, onEventClick, onSlotClick }: DayViewProps) {
+export function DayView({ currentDate, events, feedItems = [], onEventClick, onSlotClick, onFeedItemClick }: DayViewProps) {
   const dayEvents = events.filter((e) => isSameDay(new Date(e.startDate), currentDate));
   const allDayEvents = dayEvents.filter((e) => e.isAllDay);
   const timedEvents = dayEvents.filter((e) => !e.isAllDay);
   const today = isToday(currentDate);
   const laid = layoutEvents(timedEvents);
+
+  const dayFeedItems = feedItems.filter((i) => isSameDay(new Date(i.startDate), currentDate));
+  const allDayFeedItems = dayFeedItems.filter((i) => i.isAllDay);
+  const timedFeedItems = dayFeedItems.filter((i) => !i.isAllDay);
 
   return (
     <div className="rounded-lg border border-border bg-card overflow-hidden">
@@ -116,7 +123,7 @@ export function DayView({ currentDate, events, onEventClick, onSlotClick }: DayV
         </div>
       </div>
 
-      {allDayEvents.length > 0 && (
+      {(allDayEvents.length > 0 || allDayFeedItems.length > 0) && (
         <div className="border-b border-border p-2 space-y-1">
           <span className="text-xs text-muted font-medium">All day</span>
           {allDayEvents.map((event) => (
@@ -129,6 +136,20 @@ export function DayView({ currentDate, events, onEventClick, onSlotClick }: DayV
               {event.title}
             </button>
           ))}
+          {allDayFeedItems.map((item) => {
+            const Icon = FEED_SOURCE_ICON[item.source];
+            return (
+              <button
+                key={item.id}
+                onClick={() => onFeedItemClick?.(item)}
+                className="flex w-full items-center gap-1.5 truncate rounded border border-dashed px-2 py-1 text-left text-sm hover:opacity-80"
+                style={{ backgroundColor: item.color + '15', color: item.color, borderColor: item.color + '50' }}
+              >
+                <Icon className="h-3.5 w-3.5 shrink-0" />
+                <span className="truncate">{item.title}</span>
+              </button>
+            );
+          })}
         </div>
       )}
 
@@ -184,6 +205,28 @@ export function DayView({ currentDate, events, onEventClick, onSlotClick }: DayV
                 {item.event.location && (
                   <div className="text-xs opacity-70 truncate">{item.event.location}</div>
                 )}
+              </button>
+            );
+          })}
+
+          {timedFeedItems.map((feedItem) => {
+            const start = new Date(feedItem.startDate);
+            const startMin = start.getHours() * 60 + start.getMinutes();
+            const Icon = FEED_SOURCE_ICON[feedItem.source];
+            return (
+              <button
+                key={feedItem.id}
+                onClick={() => onFeedItemClick?.(feedItem)}
+                title={`${feedItem.title} · ${format(start, 'h:mm a')}`}
+                className="absolute right-1 z-10 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-dashed shadow-sm hover:scale-110 transition-transform"
+                style={{
+                  top: (startMin / 60) * SLOT_HEIGHT - 2,
+                  backgroundColor: feedItem.color + '30',
+                  color: feedItem.color,
+                  borderColor: feedItem.color,
+                }}
+              >
+                <Icon className="h-3 w-3" />
               </button>
             );
           })}

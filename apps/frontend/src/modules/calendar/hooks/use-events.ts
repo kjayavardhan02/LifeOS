@@ -3,6 +3,7 @@ import toast from 'react-hot-toast';
 import { api } from '@/lib/api';
 import type {
   CalendarEvent,
+  CalendarFeedItem,
   CreateEventInput,
   UpdateEventInput,
   EventFilters,
@@ -86,5 +87,13 @@ export function useDeleteEvent() {
       toast.success('Event deleted');
     },
     onError: (err: Error) => toast.error(err.message || 'Failed to delete event'),
+  });
+}
+
+export function useCalendarFeed(startFrom: string, startTo: string) {
+  return useQuery({
+    queryKey: ['calendar-feed', startFrom, startTo],
+    queryFn: () => api.get<ApiResponse<CalendarFeedItem[]>>(`/events/feed?startFrom=${startFrom}&startTo=${startTo}`),
+    enabled: !!startFrom && !!startTo,
   });
 }
