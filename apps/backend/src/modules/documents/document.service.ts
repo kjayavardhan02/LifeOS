@@ -4,6 +4,7 @@ import crypto from 'crypto';
 import type { Prisma } from '@prisma/client';
 import { prisma } from '../../lib/prisma.js';
 import { AppError } from '../../middleware/error-handler.js';
+import { eventBus } from '../../lib/event-bus.js';
 import type { z } from 'zod';
 import type {
   createDocumentSchema,
@@ -103,6 +104,13 @@ export const documentService = {
       include: documentInclude,
     });
 
+    eventBus.emit('document.created', {
+      documentId: doc.id,
+      name: doc.name,
+      expiryDate: doc.expiryDate?.toISOString() ?? null,
+      category: doc.category,
+    });
+
     if (storageType === 'local' && files && files.length > 0) {
       await this.processFiles(doc.id, category, files);
       return prisma.document.findUnique({
@@ -135,11 +143,21 @@ export const documentService = {
     if (input.notes !== undefined) data.notes = input.notes;
     if (input.externalUrl !== undefined) data.externalUrl = input.externalUrl;
 
-    return prisma.document.update({
+    const updated = await prisma.document.update({
       where: { id },
       data,
       include: documentInclude,
     });
+
+    if (input.expiryDate !== undefined) {
+      eventBus.emit('document.updated', {
+        documentId: id,
+        changes: { ...input },
+        expiryDate: updated.expiryDate?.toISOString() ?? null,
+      });
+    }
+
+    return updated;
   },
 
   async delete(id: string) {

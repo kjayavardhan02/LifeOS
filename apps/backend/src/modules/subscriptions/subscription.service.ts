@@ -1,6 +1,7 @@
 import type { Prisma } from '@prisma/client';
 import { prisma } from '../../lib/prisma.js';
 import { AppError } from '../../middleware/error-handler.js';
+import { eventBus } from '../../lib/event-bus.js';
 import type { z } from 'zod';
 import type {
   createSubscriptionSchema,
@@ -97,11 +98,22 @@ export const subscriptionService = {
         reminderDaysBefore: input.reminderDaysBefore,
       },
     });
+
+    eventBus.emit('subscription.created', {
+      subscriptionId: subscription.id,
+      name: subscription.name,
+      nextRenewalDate: subscription.nextRenewalDate.toISOString(),
+      reminderDaysBefore: subscription.reminderDaysBefore,
+      amount: subscription.amount,
+      billingCycle: subscription.billingCycle,
+      category: subscription.category,
+    });
+
     return attachComputedFields(subscription);
   },
 
   async update(id: string, input: UpdateSubscriptionInput) {
-    await this.getById(id);
+    const existing = await this.getById(id);
 
     const data: Prisma.SubscriptionUpdateInput = { ...input };
 
@@ -109,9 +121,21 @@ export const subscriptionService = {
       data.nextRenewalDate = new Date(input.nextRenewalDate);
     }
 
-    return prisma.subscription
-      .update({ where: { id }, data })
-      .then(attachComputedFields);
+    const updated = await prisma.subscription.update({ where: { id }, data });
+
+    if (input.status === 'cancelled' && existing.status !== 'cancelled') {
+      eventBus.emit('subscription.cancelled', {
+        subscriptionId: id,
+        name: updated.name,
+      });
+    } else {
+      eventBus.emit('subscription.updated', {
+        subscriptionId: id,
+        changes: { ...input },
+      });
+    }
+
+    return attachComputedFields(updated);
   },
 
   async delete(id: string) {

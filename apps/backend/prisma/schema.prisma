@@ -691,3 +691,68 @@ model ContentHighlight {
   @@index([contentItemId])
   @@map("content_highlights")
 }
+
+// ── Automation Engine ──────────────────────────────────────
+
+enum AutomationTriggerType {
+  event
+  schedule
+  threshold
+}
+
+enum AutomationActionType {
+  create_task
+  create_reminder
+  create_transaction
+  send_notification
+  update_status
+}
+
+model AutomationRule {
+  id              String                @id @default(uuid())
+  name            String
+  description     String?
+  isActive        Boolean               @default(true)
+  triggerType     AutomationTriggerType
+  triggerConfig   Json
+  conditions      Json?
+  actions         AutomationAction[]
+  lastTriggeredAt DateTime?
+  triggerCount    Int                   @default(0)
+  createdAt       DateTime              @default(now())
+  updatedAt       DateTime              @updatedAt
+  deletedAt       DateTime?
+
+  @@index([isActive])
+  @@index([triggerType])
+  @@index([deletedAt])
+  @@map("automation_rules")
+}
+
+model AutomationAction {
+  id         String              @id @default(uuid())
+  ruleId     String
+  actionType AutomationActionType
+  config     Json
+  sortOrder  Int                 @default(0)
+
+  rule AutomationRule @relation(fields: [ruleId], references: [id], onDelete: Cascade)
+
+  @@index([ruleId])
+  @@map("automation_actions")
+}
+
+model AutomationLog {
+  id        String   @id @default(uuid())
+  ruleId    String
+  ruleName  String
+  trigger   Json
+  actions   Json
+  status    String
+  error     String?
+  createdAt DateTime @default(now())
+
+  @@index([ruleId])
+  @@index([createdAt])
+  @@map("automation_logs")
+}

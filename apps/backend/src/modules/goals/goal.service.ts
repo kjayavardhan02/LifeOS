@@ -1,6 +1,7 @@
 import type { Prisma } from '@prisma/client';
 import { prisma } from '../../lib/prisma.js';
 import { AppError } from '../../middleware/error-handler.js';
+import { eventBus } from '../../lib/event-bus.js';
 import type { z } from 'zod';
 import type {
   createGoalSchema,
@@ -119,7 +120,7 @@ export const goalService = {
   },
 
   async update(id: string, input: UpdateGoalInput) {
-    await this.getById(id);
+    const existing = await this.getById(id);
     const goal = await prisma.goal.update({
       where: { id },
       data: input,
@@ -128,11 +129,19 @@ export const goalService = {
 
     if (goal.progressMode === 'auto') {
       const progress = await computeAutoProgress(id);
-      return prisma.goal.update({
+      const updated = await prisma.goal.update({
         where: { id },
         data: { progress },
         include: goalDetailInclude,
       });
+      if (updated.status === 'completed' && existing.status !== 'completed') {
+        eventBus.emit('goal.completed', { goalId: id, title: updated.title, progress: updated.progress });
+      }
+      return updated;
+    }
+
+    if (goal.status === 'completed' && existing.status !== 'completed') {
+      eventBus.emit('goal.completed', { goalId: id, title: goal.title, progress: goal.progress });
     }
 
     return goal;

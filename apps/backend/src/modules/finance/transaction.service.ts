@@ -1,6 +1,7 @@
 import type { Prisma } from '@prisma/client';
 import { prisma } from '../../lib/prisma.js';
 import { AppError } from '../../middleware/error-handler.js';
+import { eventBus } from '../../lib/event-bus.js';
 import type { z } from 'zod';
 import type {
   createTransactionSchema,
@@ -46,12 +47,22 @@ export const transactionService = {
   },
 
   async create(input: CreateTransactionInput) {
-    return prisma.financeTransaction.create({
+    const transaction = await prisma.financeTransaction.create({
       data: {
         ...input,
         date: new Date(input.date),
       },
     });
+
+    eventBus.emit('transaction.created', {
+      transactionId: transaction.id,
+      title: transaction.merchant ?? transaction.category,
+      amount: transaction.amount,
+      type: transaction.type,
+      category: transaction.category,
+    });
+
+    return transaction;
   },
 
   async update(id: string, input: UpdateTransactionInput) {

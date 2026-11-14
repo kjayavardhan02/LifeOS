@@ -1,6 +1,7 @@
 import type { Prisma } from '@prisma/client';
 import { prisma } from '../../lib/prisma.js';
 import { AppError } from '../../middleware/error-handler.js';
+import { eventBus } from '../../lib/event-bus.js';
 import type { z } from 'zod';
 import type {
   createHabitSchema,
@@ -136,6 +137,15 @@ export const habitService = {
     }
 
     await this.recalculateStreak(habitId);
+
+    if (log) {
+      eventBus.emit('habit.logged', {
+        habitId,
+        date: input.date,
+        value: log.value,
+      });
+    }
+
     return log;
   },
 

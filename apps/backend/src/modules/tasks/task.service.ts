@@ -1,7 +1,7 @@
 import type { Prisma } from '@prisma/client';
 import { prisma } from '../../lib/prisma.js';
 import { AppError } from '../../middleware/error-handler.js';
-import { goalService } from '../goals/goal.service.js';
+import { eventBus } from '../../lib/event-bus.js';
 import type { z } from 'zod';
 import type { createTaskSchema, updateTaskSchema, taskQuerySchema, createSubtaskSchema, updateSubtaskSchema } from './task.validator.js';
 
@@ -57,7 +57,7 @@ export const taskService = {
 
   async create(input: CreateTaskInput) {
     const { subtasks, ...taskData } = input;
-    return prisma.task.create({
+    const task = await prisma.task.create({
       data: {
         ...taskData,
         dueDate: taskData.dueDate ? new Date(taskData.dueDate) : undefined,
@@ -69,6 +69,18 @@ export const taskService = {
       },
       include: taskInclude,
     });
+
+    eventBus.emit('task.created', {
+      taskId: task.id,
+      title: task.title,
+      priority: task.priority,
+      status: task.status,
+      category: task.category,
+      dueDate: task.dueDate?.toISOString() ?? null,
+      projectId: task.projectId,
+    });
+
+    return task;
   },
 
   async update(id: string, input: UpdateTaskInput) {
@@ -101,7 +113,25 @@ export const taskService = {
 
     if (input.status) {
       const goalLinks = await prisma.goalTask.findMany({ where: { taskId: id }, select: { goalId: true } });
-      await Promise.all(goalLinks.map((gl) => goalService.refreshAutoProgress(gl.goalId)));
+      const goalIds = goalLinks.map((gl) => gl.goalId);
+
+      if (input.status === 'done') {
+        eventBus.emit('task.completed', {
+          taskId: id,
+          title: updated.title,
+          priority: updated.priority,
+          status: updated.status,
+          category: updated.category,
+          goalIds,
+        });
+      } else {
+        eventBus.emit('task.updated', {
+          taskId: id,
+          changes: { ...input, goalIds },
+          previousStatus: existing.status,
+          newStatus: input.status,
+        });
+      }
     }
 
     if (input.status === 'done' && updated.isRecurring && updated.recurrencePattern) {
@@ -172,6 +202,7 @@ export const taskService = {
       where: { id },
       data: { deletedAt: new Date() },
     });
+    eventBus.emit('task.deleted', { taskId: id });
   },
 
   async addSubtask(taskId: string, input: CreateSubtaskInput) {

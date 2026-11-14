@@ -63,3 +63,28 @@ export interface EventFilters {
   isAllDay?: boolean;
   search?: string;
 }
+
+export type CalendarFeedSource = 'event' | 'task' | 'reminder' | 'subscription';
+
+export interface CalendarFeedItem {
+  id: string;
+  title: string;
+  startDate: string;
+  endDate: string;
+  source: CalendarFeedSource;
+  sourceId: string;
+  color: string;
+  isReadOnly: boolean;
+  isAllDay: boolean;
+}
+
+export interface LifeContextSnapshot {
+  todayTasks: Array<{ id: string; title: string; dueDate: string | null; status: string; priority: string }>;
+  overdueTasks: Array<{ id: string; title: string; dueDate: string | null; status: string; priority: string }>;
+  activeReminders: Array<{ id: string; title: string; dueDate: string; priority: string; category: string }>;
+  upcomingEvents: Array<{ id: string; title: string; startDate: string; endDate: string; category: string }>;
+  upcomingRenewals: Array<{ id: string; name: string; amount: number; nextRenewalDate: string; billingCycle: string }>;
+  recentTransactions: Array<{ id: string; amount: number; type: string; category: string; date: string; merchant: string | null }>;
+  activeGoals: Array<{ id: string; title: string; progress: number; status: string }>;
+  expiringDocuments: Array<{ id: string; name: string; expiryDate: string; category: string }>;
+}

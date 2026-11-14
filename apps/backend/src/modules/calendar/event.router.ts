@@ -1,9 +1,25 @@
 import { Router, type Router as RouterType } from 'express';
 import { eventService } from './event.service.js';
+import { calendarFeedService } from './calendar-feed.service.js';
 import { validate } from '../../middleware/validate.js';
 import { createEventSchema, updateEventSchema, eventQuerySchema } from './event.validator.js';
 
 export const eventRouter: RouterType = Router();
+
+eventRouter.get('/feed', async (req, res, next) => {
+  try {
+    const startFrom = req.query.startFrom as string;
+    const startTo = req.query.startTo as string;
+    if (!startFrom || !startTo) {
+      res.status(400).json({ error: { message: 'startFrom and startTo are required', code: 'VALIDATION_ERROR' } });
+      return;
+    }
+    const data = await calendarFeedService.getFeed(startFrom, startTo);
+    res.json({ data });
+  } catch (err) {
+    next(err);
+  }
+});
 
 eventRouter.get('/', validate(eventQuerySchema, 'query'), async (req, res, next) => {
   try {

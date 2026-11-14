@@ -20,6 +20,8 @@ import { searchRouter } from './modules/search/index.js';
 import { goalRouter, habitRouter } from './modules/goals/index.js';
 import { analyticsRouter } from './modules/analytics/index.js';
 import { readingRouter } from './modules/reading/index.js';
+import { lifeContextRouter } from './modules/life-context/index.js';
+import { automationRouter } from './modules/automation/index.js';
 
 const app: Express = express();
 
@@ -53,6 +55,8 @@ app.use('/api/goals', goalRouter);
 app.use('/api/habits', habitRouter);
 app.use('/api/analytics', analyticsRouter);
 app.use('/api/reading', readingRouter);
+app.use('/api/life-context', lifeContextRouter);
+app.use('/api/automation', automationRouter);
 
 app.use(errorHandler);
 
